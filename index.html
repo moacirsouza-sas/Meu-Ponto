@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ponto Pro - Sistema de Auditoria</title>
+    <title>Ponto Pro - Auditoria GPS Total</title>
     <style>
         :root { 
             --primary: #2563eb; 
@@ -12,11 +12,11 @@
             --danger: #dc2626; 
             --bg: #f8fafc; 
             --text: #1e293b; 
-            --locked: #e2e8f0; 
+            --locked: #f1f5f9; 
         }
         
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
             background: var(--bg); 
             padding: 20px; 
             display: flex; 
@@ -38,94 +38,112 @@
             box-sizing: border-box;
         }
 
-        h2, h3 { margin-top: 0; color: var(--text); text-align: center; }
+        .btn-ponto { 
+            background: var(--primary); 
+            color: white; 
+            width: 100%; 
+            height: 55px; 
+            margin-bottom: 20px; 
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: 0.2s; 
+        }
+
+        .btn-ponto:disabled { background: #94a3b8; cursor: wait; }
 
         .grid-inputs { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
-            margin-bottom: 15px; 
+            gap: 12px; 
+            margin-bottom: 20px; 
         }
 
-        label { display: block; margin-bottom: 4px; font-weight: 600; }
-
-        input, button { 
-            padding: 12px; 
+        .input-group { 
+            position: relative; 
+            background: var(--locked); 
             border-radius: 8px; 
+            padding: 8px; 
             border: 1px solid #cbd5e1; 
-            width: 100%; 
-            box-sizing: border-box; 
-            font-size: 1rem; 
+            transition: 0.3s; 
         }
 
-        input:read-only { background-color: var(--locked); color: #64748b; cursor: not-allowed; }
-
-        button { 
-            cursor: pointer; 
+        .input-group.active { 
+            background: #fff; 
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+        
+        .input-group label { 
+            display: block; 
+            font-size: 0.7rem; 
             font-weight: bold; 
-            transition: 0.2s; 
-            border: none; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 8px;
+            color: #64748b; 
+            text-transform: uppercase; 
+            margin-bottom: 4px; 
         }
 
-        .btn-ponto { background: var(--primary); color: white; margin-bottom: 10px; height: 50px; }
-        .btn-ponto:disabled { opacity: 0.6; cursor: wait; }
-        .btn-ponto:active { transform: scale(0.98); }
+        input[type="time"] { 
+            padding: 4px 0; 
+            border: none; 
+            background: transparent; 
+            width: 100%; 
+            font-size: 1.2rem; 
+            color: var(--text); 
+            font-weight: bold; 
+            outline: none; 
+        }
+        
+        input[readonly] { cursor: not-allowed; }
 
-        .btn-save { background: var(--text); color: white; }
-        .btn-export { background: var(--success); color: white; flex: 2; }
-        .btn-reset { background: #ef4444; color: white; flex: 1; }
+        .edit-icon { 
+            position: absolute; 
+            right: 10px; 
+            bottom: 12px; 
+            font-size: 0.9rem; 
+            cursor: pointer; 
+            padding: 5px; 
+            border-radius: 4px; 
+            background: #e2e8f0; 
+            transition: 0.2s;
+        }
+
+        .edit-icon:hover { background: #cbd5e1; }
 
         .countdown { 
             font-size: 2.2rem; 
             font-weight: 800; 
             color: var(--primary); 
             text-align: center; 
-            margin: 15px 0; 
-            font-family: 'Courier New', Courier, monospace; 
+            font-family: 'Courier New', monospace; 
+            margin: 10px 0;
         }
 
-        .status { 
-            text-align: center; 
-            font-size: 0.85rem; 
-            color: #64748b; 
-            background: #f1f5f9; 
-            padding: 10px; 
-            border-radius: 6px; 
-            margin-bottom: 10px; 
-            border: 1px solid #e2e8f0; 
+        .geo-badge { 
+            font-size: 0.65rem; 
+            background: #334155; 
+            color: white; 
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            display: inline-block; 
+            margin-bottom: 15px; 
         }
-
-        .geo-info { 
-            font-size: 0.75rem; 
-            color: #94a3b8; 
-            text-align: center; 
-            margin-bottom: 15px;
-            font-style: italic;
-        }
-
-        .photo-area { 
-            margin-top: 15px; 
-            border: 2px dashed #cbd5e1; 
-            padding: 15px; 
+        
+        .btn-save { 
+            background: var(--text); 
+            color: white; 
+            width: 100%; 
+            padding: 14px; 
+            border: none; 
             border-radius: 8px; 
-            text-align: center; 
-            background: #fff; 
-        }
-
-        #preview { 
-            max-width: 100%; 
-            border-radius: 8px; 
+            font-weight: bold; 
+            cursor: pointer; 
             margin-top: 10px; 
-            display: none; 
-            max-height: 150px; 
-            object-fit: contain; 
         }
 
-        .history-grid { display: grid; gap: 10px; width: 100%; max-width: 500px; }
+        .history-grid { width: 100%; max-width: 500px; display: grid; gap: 10px; }
 
         .day-card { 
             background: white; 
@@ -135,262 +153,224 @@
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03); 
         }
 
-        .img-thumb { 
-            width: 45px; 
-            height: 45px; 
-            border-radius: 6px; 
-            object-fit: cover; 
-            border: 1px solid #ddd; 
+        .btn-clear {
+            background: #ef4444;
+            color: white;
+            padding: 8px;
+            font-size: 0.8rem;
+            border: none;
+            border-radius: 4px;
             cursor: pointer;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>⏱️ Ponto Pro</h2>
-        <button id="btnPrincipal" class="btn-ponto" onclick="registrarPonto()">
-            📍 Registrar Agora (Validar GPS)
+        <h3>⏱️ Ponto Auditoria GPS</h3>
+        <button id="btnPrincipal" class="btn-ponto" onclick="processarAcao('auto')">
+            📍 Registrar Agora (Exige GPS)
         </button>
         
         <div class="grid-inputs">
-            <div><label><small>Entrada</small></label><input type="time" id="entrada" readonly></div>
-            <div><label><small>Saída Almoço</small></label><input type="time" id="almocoSai" readonly></div>
-            <div><label><small>Volta Almoço</small></label><input type="time" id="almocoVolta" readonly></div>
-            <div><label><small>Saída Final</small></label><input type="time" id="saida" readonly></div>
+            <div class="input-group" id="group-entrada">
+                <label>Entrada</label>
+                <input type="time" id="entrada" readonly onchange="salvarRascunho()">
+                <span class="edit-icon" title="Ajustar com GPS" onclick="processarAcao('manual', 'entrada')">✏️</span>
+            </div>
+            <div class="input-group" id="group-almocoSai">
+                <label>Saída Almoço</label>
+                <input type="time" id="almocoSai" readonly onchange="salvarRascunho()">
+                <span class="edit-icon" title="Ajustar com GPS" onclick="processarAcao('manual', 'almocoSai')">✏️</span>
+            </div>
+            <div class="input-group" id="group-almocoVolta">
+                <label>Volta Almoço</label>
+                <input type="time" id="almocoVolta" readonly onchange="salvarRascunho()">
+                <span class="edit-icon" title="Ajustar com GPS" onclick="processarAcao('manual', 'almocoVolta')">✏️</span>
+            </div>
+            <div class="input-group" id="group-saida">
+                <label>Saída Final</label>
+                <input type="time" id="saida" readonly onchange="salvarRascunho()">
+                <span class="edit-icon" title="Ajustar com GPS" onclick="processarAcao('manual', 'saida')">✏️</span>
+            </div>
         </div>
 
         <div class="countdown" id="timer">00:00:00</div>
-        <div class="status" id="infoSaida">Aguardando primeiro registro...</div>
-        <div id="geoDisplay" class="geo-info">Localização pendente para o registro.</div>
-
-        <div class="photo-area">
-            <input type="file" id="fotoInput" accept="image/*" capture="environment" style="display:none">
-            <button onclick="document.getElementById('fotoInput').click()" style="background:#f1f5f9; color:#475569; border: 1px solid #cbd5e1;">
-                📷 Foto do Comprovante
-            </button>
-            <img id="preview">
+        
+        <div style="text-align:center">
+            <div id="geoDisplay" class="geo-badge">Aguardando validação de presença...</div>
         </div>
         
-        <button onclick="finalizarDia()" class="btn-save" style="margin-top: 15px;">💾 Finalizar e Arquivar Dia</button>
-    </div>
-
-    <div class="card">
-        <h3>📊 Banco de Horas Acumulado</h3>
-        <div id="saldoGeral" style="font-size: 1.8rem; font-weight: bold; text-align: center;">0h 0m</div>
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button onclick="exportarExcel()" class="btn-export">📥 Exportar CSV</button>
-            <button onclick="limparHistorico()" class="btn-reset">🗑️ Reset</button>
-        </div>
+        <button onclick="finalizarDia()" class="btn-save">💾 Finalizar e Arquivar Dia</button>
     </div>
 
     <div id="historico" class="history-grid"></div>
 
+    <button class="btn-clear" onclick="limparTudo()">🗑️ Limpar Todo Histórico</button>
+
     <script>
-        let base64Image = "";
-        let currentGeo = "Não capturada";
         const campos = ['entrada', 'almocoSai', 'almocoVolta', 'saida'];
+        let logGeo = {}; 
 
         window.onload = () => {
-            const rascunho = JSON.parse(localStorage.getItem('rascunho_ponto') || '{}');
+            const rascunho = JSON.parse(localStorage.getItem('rascunho_ponto_v3') || '{}');
+            logGeo = rascunho.logs || {};
             campos.forEach(id => {
-                if (rascunho[id]) document.getElementById(id).value = rascunho[id];
+                if (rascunho[id]) {
+                    document.getElementById(id).value = rascunho[id];
+                    document.getElementById(id).readOnly = false;
+                }
             });
-            if (rascunho.foto) {
-                base64Image = rascunho.foto;
-                const p = document.getElementById('preview');
-                p.src = base64Image; p.style.display = 'block';
-            }
             renderizarHistorico();
-            calcular();
+            iniciarTimer();
         };
 
-        // Função Principal: GPS + Registro
-        function registrarPonto() {
+        // Captura GPS Obrigatória para qualquer ação
+        function processarAcao(tipo, campoAlvo = null) {
             const btn = document.getElementById('btnPrincipal');
             btn.disabled = true;
             btn.innerText = "🛰️ Validando GPS...";
 
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        currentGeo = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
-                        document.getElementById('geoDisplay').innerText = `📍 Localização confirmada: ${currentGeo}`;
-                        executarBatidaPonto();
-                    },
-                    (error) => {
-                        alert("ERRO: O acesso ao GPS é obrigatório para registrar o ponto.");
-                        console.error(error);
-                        resetBotaoPrincipal();
-                    },
-                    { enableHighAccuracy: true, timeout: 8000 }
-                );
-            } else {
-                alert("Seu navegador não suporta geolocalização.");
-                resetBotaoPrincipal();
+            if (!navigator.geolocation) {
+                alert("GPS não disponível.");
+                btn.disabled = false;
+                return;
             }
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const geoStr = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+                    document.getElementById('geoDisplay').innerText = `✅ Localizado: ${geoStr}`;
+                    
+                    if (tipo === 'auto') {
+                        executarBatidaAuto(geoStr);
+                    } else {
+                        executarLiberacaoManual(campoAlvo, geoStr);
+                    }
+
+                    btn.disabled = false;
+                    btn.innerText = "📍 Registrar Agora (Exige GPS)";
+                },
+                (err) => {
+                    alert("Acesso Negado! O GPS é obrigatório para registrar ou editar o ponto.");
+                    btn.disabled = false;
+                    btn.innerText = "📍 Registrar Agora (Exige GPS)";
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
         }
 
-        function executarBatidaPonto() {
-            const agora = new Date();
-            const horaFormatada = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            
-            let campoPreenchido = false;
+        function executarBatidaAuto(geo) {
+            const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             for (let id of campos) {
                 const el = document.getElementById(id);
                 if (!el.value) {
-                    el.value = horaFormatada;
-                    el.style.backgroundColor = "#dcfce7";
-                    
-                    // Salva no rascunho local
-                    const rascunho = JSON.parse(localStorage.getItem('rascunho_ponto') || '{}');
-                    rascunho[id] = horaFormatada;
-                    rascunho.foto = base64Image;
-                    rascunho.ultimoGeo = currentGeo;
-                    localStorage.setItem('rascunho_ponto', JSON.stringify(rascunho));
-                    
-                    campoPreenchido = true;
+                    el.value = horaAtual;
+                    el.readOnly = false;
+                    logGeo[id] = `Auto: ${geo}`;
+                    salvarRascunho();
                     break;
                 }
             }
+        }
+
+        function executarLiberacaoManual(id, geo) {
+            const el = document.getElementById(id);
+            el.readOnly = false;
+            el.focus();
+            // Reset de estilo visual para campos ativos
+            document.querySelectorAll('.input-group').forEach(g => g.classList.remove('active'));
+            el.parentElement.classList.add('active');
             
-            if (!campoPreenchido) alert("Todos os horários de hoje já foram registrados.");
-            resetBotaoPrincipal();
-            calcular();
+            logGeo[id] = `Manual: ${geo}`;
+            salvarRascunho();
+            alert(`GPS Validado! Edição liberada para o campo: ${id}`);
         }
 
-        function resetBotaoPrincipal() {
-            const btn = document.getElementById('btnPrincipal');
-            btn.disabled = false;
-            btn.innerText = "📍 Registrar Agora (Validar GPS)";
+        function salvarRascunho() {
+            const dados = { logs: logGeo };
+            campos.forEach(id => { dados[id] = document.getElementById(id).value; });
+            localStorage.setItem('rascunho_ponto_v3', JSON.stringify(dados));
         }
 
-        function processarImagem(file) {
-            if (!file) return;
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (e) => {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX = 500;
-                    const scale = MAX / img.width;
-                    canvas.width = MAX; canvas.height = img.height * scale;
-                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                    base64Image = canvas.toDataURL('image/jpeg', 0.6);
-                    document.getElementById('preview').src = base64Image;
-                    document.getElementById('preview').style.display = 'block';
-                };
-            };
-        }
-
-        document.getElementById('fotoInput').onchange = (e) => processarImagem(e.target.files[0]);
-
-        function calcular() {
-            const ent = document.getElementById('entrada').value;
-            if (ent) {
-                const [h, m] = ent.split(':').map(Number);
-                const prevMin = (h * 60) + m + 540; // 8h trab + 1h almoço
-                document.getElementById('infoSaida').innerText = `Saída prevista (9h total): ${String(Math.floor(prevMin/60)).padStart(2,'0')}:${String(prevMin%60).padStart(2,'0')}`;
-            }
+        function calcularSaldo(ent, sai) {
+            if (!ent || !sai) return 0;
+            const h1 = new Date(`1970-01-01T${ent}:00`);
+            const h2 = new Date(`1970-01-01T${sai}:00`);
+            return ((h2 - h1) / 60000) - 540; // Base 9h (8h trab + 1h almoço)
         }
 
         function finalizarDia() {
             const ent = document.getElementById('entrada').value;
             const sai = document.getElementById('saida').value;
-            if (!ent || !sai) return alert("Preencha ao menos Entrada e Saída Final.");
+            if (!ent || !sai) return alert("Entrada e Saída Final são obrigatórias.");
 
-            const hoje = new Date().toLocaleDateString('pt-BR');
-            const minTrabalhados = ((new Date(`1970-01-01T${sai}:00`) - new Date(`1970-01-01T${ent}:00`)) / 60000) - 60;
-            
             const registro = {
-                data: hoje,
-                entrada: ent, 
-                saida: sai, 
-                saldo: minTrabalhados - 480, // Comparado a 8h úteis
-                foto: base64Image,
-                geo: currentGeo
+                data: new Date().toLocaleDateString('pt-BR'),
+                entrada: ent,
+                saida: sai,
+                detalhesGeo: logGeo,
+                saldo: calcularSaldo(ent, sai)
             };
 
-            let hist = JSON.parse(localStorage.getItem('ponto_db') || '[]');
+            const hist = JSON.parse(localStorage.getItem('ponto_db_v3') || '[]');
             hist.push(registro);
-            localStorage.setItem('ponto_db', JSON.stringify(hist));
-            localStorage.removeItem('rascunho_ponto');
+            localStorage.setItem('ponto_db_v3', JSON.stringify(hist));
+            localStorage.removeItem('rascunho_ponto_v3');
             location.reload();
         }
 
         function renderizarHistorico() {
-            const hist = JSON.parse(localStorage.getItem('ponto_db') || '[]');
+            const hist = JSON.parse(localStorage.getItem('ponto_db_v3') || '[]');
             const container = document.getElementById('historico');
-            let totalMinutos = 0; 
-            container.innerHTML = '';
-
-            hist.slice().reverse().forEach(dia => {
-                totalMinutos += dia.saldo;
+            container.innerHTML = hist.reverse().map(dia => {
                 const cor = dia.saldo >= 0 ? 'var(--success)' : 'var(--danger)';
-                container.innerHTML += `
+                return `
                     <div class="day-card" style="border-left-color: ${cor}">
-                        <div style="max-width: 70%;">
+                        <div>
                             <strong>${dia.data}</strong><br>
-                            <small>${dia.entrada} ➔ ${dia.saida}</small><br>
-                            <span style="font-size:0.6rem; color:#94a3b8; display:block;">📍 ${dia.geo}</span>
+                            <small>${dia.entrada} ➔ ${dia.saida}</small>
                         </div>
-                        <div style="display:flex; align-items:center; gap:8px">
-                            ${dia.foto ? `<img src="${dia.foto}" class="img-thumb" onclick="window.open(this.src)">` : ''}
-                            <span style="color:${cor}; font-weight:bold;">${dia.saldo > 0 ? '+' : ''}${dia.saldo}m</span>
+                        <div style="text-align:right">
+                            <span style="color:${cor}; font-weight:bold">${dia.saldo > 0 ? '+' : ''}${dia.saldo}m</span><br>
+                            <span style="font-size:0.5rem; color:#94a3b8; cursor:help" title='${JSON.stringify(dia.detalhesGeo)}'>📍 Ver Logs GPS</span>
                         </div>
-                    </div>`;
-            });
-            const hTotal = Math.floor(totalMinutos / 60);
-            const mTotal = Math.abs(totalMinutos % 60);
-            const labelSaldo = document.getElementById('saldoGeral');
-            labelSaldo.innerText = `${hTotal}h ${mTotal}m`;
-            labelSaldo.style.color = totalMinutos >= 0 ? 'var(--success)' : 'var(--danger)';
+                    </div>
+                `;
+            }).join('');
         }
 
-        function exportarExcel() {
-            const hist = JSON.parse(localStorage.getItem('ponto_db') || '[]');
-            if(hist.length === 0) return alert("Sem dados.");
-            let csv = "\ufeffData;Entrada;Saida;Saldo;Localizacao\n";
-            hist.forEach(d => csv += `${d.data};${d.entrada};${d.saida};${d.saldo};${d.geo}\n`);
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `ponto_auditoria.csv`;
-            link.click();
-        }
-
-        function limparHistorico() {
-            if(confirm("Deseja apagar TODO o histórico permanentemente?")) { 
-                localStorage.clear(); 
-                location.reload(); 
+        function limparTudo() {
+            if(confirm("Deseja apagar permanentemente todos os registros?")) {
+                localStorage.clear();
+                location.reload();
             }
         }
 
-        // Timer de Contagem Regressiva
-        setInterval(() => {
-            const ent = document.getElementById('entrada').value;
-            if(ent) {
-                const [h, m] = ent.split(':');
-                const alvo = new Date();
-                alvo.setHours(parseInt(h) + 9, parseInt(m), 0);
-                const diff = alvo - new Date();
-                if(diff > 0) {
-                    const hh = Math.floor(diff / 3600000);
-                    const mm = Math.floor((diff % 3600000) / 60000);
-                    const ss = Math.floor((diff % 60000) / 1000);
-                    document.getElementById('timer').innerText = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
-                } else { 
-                    document.getElementById('timer').innerText = "CONCLUÍDO";
+        function iniciarTimer() {
+            setInterval(() => {
+                const ent = document.getElementById('entrada').value;
+                if (ent) {
+                    const [h, m] = ent.split(':');
+                    const meta = new Date(); meta.setHours(parseInt(h)+9, parseInt(m), 0);
+                    const diff = meta - new Date();
+                    if (diff > 0) {
+                        const t = new Date(diff).toISOString().substr(11, 8);
+                        document.getElementById('timer').innerText = t;
+                    } else { 
+                        document.getElementById('timer').innerText = "CONCLUÍDO";
+                        document.getElementById('timer').style.color = "var(--success)";
+                    }
                 }
-            }
-        }, 1000);
+            }, 1000);
+        }
     </script>
 </body>
 </html>
+
 
 
