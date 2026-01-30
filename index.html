@@ -4,40 +4,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ponto Pro - Versão Homologada</title>
+    <title>Ponto Pro - Versão Auditoria</title>
     <style>
-        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --bg: #f8fafc; --text: #1e293b; }
+        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --bg: #f8fafc; --text: #1e293b; --locked: #e2e8f0; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 20px; display: flex; flex-direction: column; align-items: center; color: var(--text); }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); width: 100%; max-width: 500px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
         .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         input, button { padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; width: 100%; box-sizing: border-box; font-size: 1rem; }
+        input:read-only { background-color: var(--locked); color: #64748b; cursor: not-allowed; }
         button { cursor: pointer; font-weight: bold; transition: 0.2s; border: none; }
         .btn-ponto { background: var(--primary); color: white; margin-bottom: 10px; }
+        .btn-ponto:disabled { opacity: 0.5; cursor: wait; }
         .btn-save { background: var(--text); color: white; }
         .countdown { font-size: 2rem; font-weight: 800; color: var(--primary); text-align: center; margin: 15px 0; font-family: 'Courier New', Courier, monospace; }
         .status { text-align: center; font-size: 0.85rem; color: #64748b; background: #f1f5f9; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
+        .geo-info { font-size: 0.7rem; color: #94a3b8; margin-top: 5px; text-align: center; }
         .photo-area { margin-top: 15px; border: 2px dashed #cbd5e1; padding: 10px; border-radius: 8px; text-align: center; background: #fff; }
         #preview { max-width: 100%; border-radius: 8px; margin-top: 10px; display: none; max-height: 150px; object-fit: contain; }
         .history-grid { display: grid; gap: 10px; width: 100%; max-width: 500px; }
         .day-card { background: white; padding: 12px; border-radius: 8px; border-left: 5px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
-        .img-thumb { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; border: 1px solid #ddd; cursor: zoom-in; }
+        .img-thumb { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>⏱️ Registro de Ponto</h2>
-        <button class="btn-ponto" onclick="marcarPontoRapido()">📍 Registrar Agora</button>
+        <h2>⏱️ Ponto Pro - Auditoria</h2>
+        <button id="btnPrincipal" class="btn-ponto" onclick="registrarPontoOficial()">📍 Registrar Agora (Hora Oficial)</button>
         
         <div class="grid-inputs">
-            <div><label><small>Entrada</small></label><input type="time" id="entrada"></div>
-            <div><label><small>Saída Almoço</small></label><input type="time" id="almocoSai"></div>
-            <div><label><small>Volta Almoço</small></label><input type="time" id="almocoVolta"></div>
-            <div><label><small>Saída Final</small></label><input type="time" id="saida"></div>
+            <div><label><small>Entrada</small></label><input type="time" id="entrada" readonly></div>
+            <div><label><small>Saída Almoço</small></label><input type="time" id="almocoSai" readonly></div>
+            <div><label><small>Volta Almoço</small></label><input type="time" id="almocoVolta" readonly></div>
+            <div><label><small>Saída Final</small></label><input type="time" id="saida" readonly></div>
         </div>
 
         <div class="countdown" id="timer">00:00:00</div>
-        <div class="status" id="infoSaida">Aguardando registro de entrada...</div>
+        <div class="status" id="infoSaida">Sincronizando geolocalização...</div>
+        <div id="geoDisplay" class="geo-info">Aguardando coordenadas...</div>
 
         <div class="photo-area">
             <input type="file" id="fotoInput" accept="image/*" capture="environment" style="display:none">
@@ -61,39 +65,88 @@
 
     <script>
         let base64Image = "";
+        let currentGeo = "Pendente";
         const campos = ['entrada', 'almocoSai', 'almocoVolta', 'saida'];
-
-        window.onbeforeunload = () => "Existem dados não salvos. Deseja sair?";
 
         window.onload = () => {
             const rascunho = JSON.parse(localStorage.getItem('rascunho_ponto') || '{}');
             campos.forEach(id => {
-                if (rascunho[id]) document.getElementById(id).value = rascunho[id];
+                if (rascunho[id]) {
+                    document.getElementById(id).value = rascunho[id];
+                }
             });
             if (rascunho.foto) {
                 base64Image = rascunho.foto;
                 const p = document.getElementById('preview');
                 p.src = base64Image; p.style.display = 'block';
             }
-            if (!rascunho.dataReferencia) {
-                // Se é um rascunho novo, marca a data de hoje como referência
-                rascunho.dataReferencia = new Date().toLocaleDateString('pt-BR');
-                localStorage.setItem('rascunho_ponto', JSON.stringify(rascunho));
-            }
+            capturarGeoEIP();
             renderizarHistorico();
             calcular();
         };
 
-        // Escuta mudanças nos inputs para Auto-Save
-        document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', () => {
-                const rascunho = JSON.parse(localStorage.getItem('rascunho_ponto') || '{}');
-                campos.forEach(id => rascunho[id] = document.getElementById(id).value);
-                rascunho.foto = base64Image;
-                localStorage.setItem('rascunho_ponto', JSON.stringify(rascunho));
-                calcular();
-            });
-        });
+        // Captura de Geo e IP
+        async function capturarGeoEIP() {
+            try {
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipRes.json();
+                const ip = ipData.ip;
+
+                if ("geolocation" in navigator) {
+                    navigator.geolocation.getCurrentPosition(pos => {
+                        currentGeo = `IP: ${ip} | Lat: ${pos.coords.latitude.toFixed(4)}, Lon: ${pos.coords.longitude.toFixed(4)}`;
+                        document.getElementById('geoDisplay').innerText = currentGeo;
+                        document.getElementById('infoSaida').innerText = "Sistema pronto.";
+                    }, () => {
+                        currentGeo = `IP: ${ip} | GPS Negado`;
+                        document.getElementById('geoDisplay').innerText = currentGeo;
+                    });
+                }
+            } catch (e) {
+                currentGeo = "Erro de conexão";
+            }
+        }
+
+        // Busca hora oficial de Brasília
+        async function obterHoraOficial() {
+            try {
+                const res = await fetch('https://worldtimeapi.org/api/timezone/America/Sao_Paulo');
+                const data = await res.json();
+                // Retorna apenas HH:MM
+                return data.datetime.split('T')[1].substring(0, 5);
+            } catch (e) {
+                console.warn("Falha na API de hora, usando hora local.");
+                return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            }
+        }
+
+        async function registrarPontoOficial() {
+            const btn = document.getElementById('btnPrincipal');
+            btn.disabled = true;
+            btn.innerText = "⌛ Consultando servidor...";
+
+            const horaOficial = await obterHoraOficial();
+            
+            for (let id of campos) {
+                const el = document.getElementById(id);
+                if (!el.value) {
+                    el.value = horaOficial;
+                    el.style.backgroundColor = "#dcfce7";
+                    
+                    // Salva rascunho
+                    const rascunho = JSON.parse(localStorage.getItem('rascunho_ponto') || '{}');
+                    rascunho[id] = horaOficial;
+                    rascunho.foto = base64Image;
+                    localStorage.setItem('rascunho_ponto', JSON.stringify(rascunho));
+                    
+                    break;
+                }
+            }
+            
+            btn.disabled = false;
+            btn.innerText = "📍 Registrar Agora (Hora Oficial)";
+            calcular();
+        }
 
         function processarImagem(file) {
             if (!file) return;
@@ -109,35 +162,19 @@
                     canvas.width = MAX; canvas.height = img.height * scale;
                     canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
                     base64Image = canvas.toDataURL('image/jpeg', 0.6);
-                    const p = document.getElementById('preview');
-                    p.src = base64Image; p.style.display = 'block';
-                    // Atualiza rascunho com a foto
-                    const rascunho = JSON.parse(localStorage.getItem('rascunho_ponto') || '{}');
-                    rascunho.foto = base64Image;
-                    localStorage.setItem('rascunho_ponto', JSON.stringify(rascunho));
+                    document.getElementById('preview').src = base64Image;
+                    document.getElementById('preview').style.display = 'block';
                 };
             };
         }
 
         document.getElementById('fotoInput').onchange = (e) => processarImagem(e.target.files[0]);
 
-        function marcarPontoRapido() {
-            const agora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            for (let id of campos) {
-                const el = document.getElementById(id);
-                if (!el.value) {
-                    el.value = agora;
-                    el.dispatchEvent(new Event('input'));
-                    break;
-                }
-            }
-        }
-
         function calcular() {
             const ent = document.getElementById('entrada').value;
             if (ent) {
                 const [h, m] = ent.split(':').map(Number);
-                const previsaoMin = (h * 60) + m + 540; // 9h totais
+                const previsaoMin = (h * 60) + m + 540; 
                 document.getElementById('infoSaida').innerText = `Saída prevista: ${String(Math.floor(previsaoMin/60)).padStart(2,'0')}:${String(previsaoMin%60).padStart(2,'0')}`;
             }
         }
@@ -145,30 +182,23 @@
         function finalizarDia() {
             const ent = document.getElementById('entrada').value;
             const sai = document.getElementById('saida').value;
-            if (!ent || !sai) return alert("Erro: Preencha ao menos a Entrada e a Saída Final antes de arquivar!");
+            if (!ent || !sai) return alert("Erro: Entrada e Saída Final são obrigatórias.");
 
-            const rascunho = JSON.parse(localStorage.getItem('rascunho_ponto') || '{}');
-            const dataPonto = rascunho.dataReferencia || new Date().toLocaleDateString('pt-BR');
-
-            // Cálculo preciso
-            const minTrabalhados = ((new Date(`1970-01-01T${sai}:00`) - new Date(`1970-01-01T${ent}:00`)) / 60000) - 60;
+            const hoje = new Date().toLocaleDateString('pt-BR');
             const registro = {
-                data: dataPonto,
-                entrada: ent, saida: sai, saldo: minTrabalhados - 480, foto: base64Image
+                data: hoje,
+                entrada: ent, 
+                saida: sai, 
+                saldo: ((new Date(`1970-01-01T${sai}:00`) - new Date(`1970-01-01T${ent}:00`)) / 60000) - 60 - 480, 
+                foto: base64Image,
+                geo: currentGeo
             };
 
             let hist = JSON.parse(localStorage.getItem('ponto_db') || '[]');
             hist.push(registro);
             localStorage.setItem('ponto_db', JSON.stringify(hist));
-            
-            // Reset Limpo
             localStorage.removeItem('rascunho_ponto');
-            campos.forEach(id => document.getElementById(id).value = "");
-            document.getElementById('preview').style.display = "none";
-            base64Image = "";
-            
-            renderizarHistorico();
-            alert("Dia arquivado com sucesso!");
+            location.reload();
         }
 
         function renderizarHistorico() {
@@ -180,11 +210,18 @@
             hist.slice().reverse().forEach(dia => {
                 totalMinutos += dia.saldo;
                 const cor = dia.saldo >= 0 ? 'var(--success)' : 'var(--danger)';
-                const fotoHtml = dia.foto ? `<img src="${dia.foto}" class="img-thumb" onclick="window.open(this.src)">` : '<span style="color:#cbd5e1">🚫</span>';
+                const fotoHtml = dia.foto ? `<img src="${dia.foto}" class="img-thumb" onclick="window.open(this.src)">` : '🚫';
                 container.innerHTML += `
                     <div class="day-card" style="border-left-color: ${cor}">
-                        <div><strong>${dia.data}</strong><br><small>${dia.entrada} ➔ ${dia.saida}</small></div>
-                        <div style="display:flex; align-items:center; gap:12px">${fotoHtml}<span style="color:${cor}; font-weight:bold">${dia.saldo > 0 ? '+' : ''}${dia.saldo}m</span></div>
+                        <div style="max-width: 70%;">
+                            <strong>${dia.data}</strong><br>
+                            <small>${dia.entrada} ➔ ${dia.saida}</small><br>
+                            <span style="font-size:0.55rem; color:#94a3b8; display:block; line-height:1">${dia.geo || ''}</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px">
+                            ${fotoHtml}
+                            <span style="color:${cor}; font-weight:bold; font-size: 0.9rem;">${dia.saldo > 0 ? '+' : ''}${dia.saldo}m</span>
+                        </div>
                     </div>`;
             });
             const hTotal = Math.floor(totalMinutos / 60);
@@ -196,24 +233,20 @@
 
         function exportarExcel() {
             const hist = JSON.parse(localStorage.getItem('ponto_db') || '[]');
-            if(hist.length === 0) return alert("Não há dados para exportar.");
-            let csv = "\ufeffData;Entrada;Saida;Saldo_Minutos\n";
-            hist.forEach(d => csv += `${d.data};${d.entrada};${d.saida};${d.saldo}\n`);
+            if(hist.length === 0) return alert("Sem dados.");
+            let csv = "\ufeffData;Entrada;Saida;Saldo;Geo_IP\n";
+            hist.forEach(d => csv += `${d.data};${d.entrada};${d.saida};${d.saldo};${d.geo}\n`);
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `ponto_${new Date().getMonth()+1}.csv`;
+            link.download = `ponto_oficial.csv`;
             link.click();
         }
 
         function limparHistorico() {
-            if(confirm("ATENÇÃO: Isso apagará o rascunho de hoje e todo o histórico. Confirmar?")) { 
-                localStorage.clear(); 
-                location.reload(); 
-            }
+            if(confirm("Apagar histórico permanente?")) { localStorage.clear(); location.reload(); }
         }
 
-        // Cronômetro de precisão
         setInterval(() => {
             const ent = document.getElementById('entrada').value;
             if(ent) {
@@ -228,10 +261,10 @@
                     document.getElementById('timer').innerText = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
                 } else { 
                     document.getElementById('timer').innerText = "CONCLUÍDO";
-                    document.getElementById('timer').style.color = "var(--success)";
                 }
             }
         }, 1000);
     </script>
 </body>
 </html>
+
