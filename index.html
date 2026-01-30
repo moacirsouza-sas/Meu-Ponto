@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ponto Pro | Auditoria GPS Mandatória</title>
+    <title>Ponto Pro | Sistema de Auditoria V7</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -107,7 +107,7 @@
             outline: none;
         }
 
-        .input-box input[readonly] { cursor: not-allowed; opacity: 0.6; }
+        .input-box input[readonly] { cursor: not-allowed; color: #9ca3af; }
 
         .edit-trigger {
             position: absolute;
@@ -173,10 +173,7 @@
             font-weight: 700;
             border: none;
             cursor: pointer;
-            transition: opacity 0.2s;
         }
-
-        .btn-finish:active { opacity: 0.8; }
     </style>
 </head>
 <body>
@@ -189,42 +186,42 @@
 
         <div class="card">
             <button id="btnPrincipal" class="btn-ponto" onclick="processarGeolocalizacao('auto')">
-                <span>📍</span> Registrar Agora
+                <span>📍</span> Registrar Ponto
             </button>
 
             <div class="grid-inputs">
                 <div class="input-box" id="box-entrada">
                     <label>Entrada</label>
                     <input type="time" id="entrada" readonly onchange="salvarRascunho()">
-                    <span class="edit-trigger" title="Liberar via GPS" onclick="processarGeolocalizacao('manual', 'entrada')">✎</span>
+                    <span class="edit-trigger" onclick="processarGeolocalizacao('manual', 'entrada')">✎</span>
                 </div>
                 <div class="input-box" id="box-almocoSai">
                     <label>Saída Almoço</label>
                     <input type="time" id="almocoSai" readonly onchange="salvarRascunho()">
-                    <span class="edit-trigger" title="Liberar via GPS" onclick="processarGeolocalizacao('manual', 'almocoSai')">✎</span>
+                    <span class="edit-trigger" onclick="processarGeolocalizacao('manual', 'almocoSai')">✎</span>
                 </div>
                 <div class="input-box" id="box-almocoVolta">
                     <label>Volta Almoço</label>
                     <input type="time" id="almocoVolta" readonly onchange="salvarRascunho()">
-                    <span class="edit-trigger" title="Liberar via GPS" onclick="processarGeolocalizacao('manual', 'almocoVolta')">✎</span>
+                    <span class="edit-trigger" onclick="processarGeolocalizacao('manual', 'almocoVolta')">✎</span>
                 </div>
                 <div class="input-box" id="box-saida">
                     <label>Saída Final</label>
                     <input type="time" id="saida" readonly onchange="salvarRascunho()">
-                    <span class="edit-trigger" title="Liberar via GPS" onclick="processarGeolocalizacao('manual', 'saida')">✎</span>
+                    <span class="edit-trigger" onclick="processarGeolocalizacao('manual', 'saida')">✎</span>
                 </div>
             </div>
 
             <div class="timer-section">
-                <p style="font-size: 0.65rem; color: var(--text-sub); font-weight: 800; letter-spacing: 0.5px;">TEMPO PARA SAÍDA</p>
+                <p style="font-size: 0.65rem; color: var(--text-sub); font-weight: 800; letter-spacing: 0.5px;">TEMPO RESTANTE</p>
                 <div id="timer">00:00:00</div>
-                <div id="geoDisplay" class="geo-badge">GPS Offline</div>
+                <div id="geoDisplay" class="geo-badge">GPS Necessário</div>
             </div>
 
             <button class="btn-finish" onclick="arquivarDia()">Arquivar Registro do Dia</button>
         </div>
 
-        <h3 class="history-title">Histórico de Registros</h3>
+        <h3 class="history-title">Histórico de Ponto</h3>
         <div id="lista-historico"></div>
     </div>
 
@@ -232,18 +229,17 @@
         const CAMPOS = ['entrada', 'almocoSai', 'almocoVolta', 'saida'];
         let registroGeos = {};
 
-        // Inicialização do App
         document.getElementById('display-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
 
         window.onload = () => {
-            const rascunho = JSON.parse(localStorage.getItem('ponto_rascunho_v6') || '{}');
+            const rascunho = JSON.parse(localStorage.getItem('ponto_v7_save') || '{}');
             registroGeos = rascunho.geos || {};
             
             CAMPOS.forEach(id => {
                 if (rascunho[id]) {
                     const el = document.getElementById(id);
                     el.value = rascunho[id];
-                    el.readOnly = false; // Se já estava salvo, mantemos liberado
+                    el.removeAttribute('readonly'); 
                     document.getElementById(`box-${id}`).classList.add('unlocked');
                 }
             });
@@ -251,17 +247,12 @@
             atualizarTimer();
         };
 
-        // Função que obriga o GPS para qualquer ação (Auto ou Manual)
         function processarGeolocalizacao(modo, alvo = null) {
-            const btn = document.getElementById('btnPrincipal');
             const status = document.getElementById('geoDisplay');
-            
-            btn.disabled = true;
-            status.innerHTML = "<span>🛰️</span> Validando localização...";
+            status.innerHTML = "<span>🛰️</span> Buscando localização...";
 
             if (!navigator.geolocation) {
-                alert("GPS não suportado.");
-                btn.disabled = false;
+                alert("GPS não suportado neste navegador.");
                 return;
             }
 
@@ -275,15 +266,12 @@
                     } else {
                         liberarCampoManual(alvo, latLon);
                     }
-
-                    btn.disabled = false;
                 },
                 (err) => {
-                    alert("Acesso negado! O GPS é obrigatório para registrar ou editar.");
+                    alert("Ação Bloqueada: É obrigatório permitir o acesso ao GPS para registrar o ponto.");
                     status.innerHTML = "<span>❌</span> GPS Obrigatório";
-                    btn.disabled = false;
                 },
-                { enableHighAccuracy: true, timeout: 8000 }
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
         }
 
@@ -292,8 +280,8 @@
             for (let id of CAMPOS) {
                 const input = document.getElementById(id);
                 if (!input.value) {
+                    input.removeAttribute('readonly'); 
                     input.value = hora;
-                    input.readOnly = false;
                     document.getElementById(`box-${id}`).classList.add('unlocked');
                     registroGeos[id] = `Auto: ${geo}`;
                     salvarRascunho();
@@ -304,42 +292,43 @@
 
         function liberarCampoManual(id, geo) {
             const input = document.getElementById(id);
-            input.readOnly = false;
+            input.removeAttribute('readonly'); 
             input.focus();
             document.getElementById(`box-${id}`).classList.add('unlocked');
             registroGeos[id] = `Manual: ${geo}`;
             salvarRascunho();
-            alert(`GPS Validado! Você pode ajustar o campo [${id}] agora.`);
+            alert("Localização confirmada! Campo liberado para ajuste.");
         }
 
         function salvarRascunho() {
             const data = { geos: registroGeos };
             CAMPOS.forEach(id => data[id] = document.getElementById(id).value);
-            localStorage.setItem('ponto_rascunho_v6', JSON.stringify(data));
+            localStorage.setItem('ponto_v7_save', JSON.stringify(data));
         }
 
         function arquivarDia() {
             const ent = document.getElementById('entrada').value;
             const sai = document.getElementById('saida').value;
-            if (!ent || !sai) return alert("Preencha ao menos Entrada e Saída.");
+            if (!ent || !sai) return alert("Pelo menos Entrada e Saída são necessárias.");
 
-            const db = JSON.parse(localStorage.getItem('ponto_db_v6') || '[]');
-            const minutos = (new Date(`1970-01-01T${sai}`) - new Date(`1970-01-01T${ent}`)) / 60000;
+            const db = JSON.parse(localStorage.getItem('ponto_v7_db') || '[]');
+            const diff = (new Date(`1970-01-01T${sai}`) - new Date(`1970-01-01T${ent}`)) / 60000;
             
             db.push({
                 data: new Date().toLocaleDateString('pt-BR'),
                 entrada: ent,
                 saida: sai,
-                saldo: minutos - 540 // 8h trab + 1h almoço
+                geoLogs: registroGeos,
+                saldo: diff - 540 
             });
 
-            localStorage.setItem('ponto_db_v6', JSON.stringify(db));
-            localStorage.removeItem('ponto_rascunho_v6');
+            localStorage.setItem('ponto_v7_db', JSON.stringify(db));
+            localStorage.removeItem('ponto_v7_save');
             location.reload();
         }
 
         function renderizarHistorico() {
-            const db = JSON.parse(localStorage.getItem('ponto_db_v6') || '[]');
+            const db = JSON.parse(localStorage.getItem('ponto_v7_db') || '[]');
             document.getElementById('lista-historico').innerHTML = db.reverse().map(i => `
                 <div class="day-card">
                     <div class="day-info">
@@ -363,7 +352,7 @@
                     if (diff > 0) {
                         document.getElementById('timer').innerText = new Date(diff).toISOString().substr(11, 8);
                     } else {
-                        document.getElementById('timer').innerText = "LIBERADO";
+                        document.getElementById('timer').innerText = "CONCLUÍDO";
                         document.getElementById('timer').style.color = "var(--success)";
                     }
                 }
@@ -372,6 +361,7 @@
     </script>
 </body>
 </html>
+
 
 
 
