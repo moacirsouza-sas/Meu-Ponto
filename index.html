@@ -10,29 +10,108 @@
             --primary: #2563eb;
             --success: #16a34a;
             --danger: #dc2626;
+            --warning: #f59e0b;
             --bg: #f8fafc;
+            --text: #1e293b;
         }
-        body { font-family: sans-serif; background: var(--bg); padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .card { background: white; padding: 20px; border-radius: 12px; shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        h2 { margin-top: 0; color: #1e293b; }
-        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; width: 100%; box-sizing: border-box; }
-        button { cursor: pointer; padding: 10px; border: none; border-radius: 6px; font-weight: bold; transition: 0.2s; }
-        .btn-ponto { background: var(--primary); color: white; width: 100%; margin-bottom: 10px; }
-        .btn-ponto:hover { opacity: 0.9; }
-        .countdown { font-size: 1.5rem; font-weight: bold; color: var(--primary); text-align: center; margin: 15px 0; }
-        .status { text-align: center; font-size: 0.9rem; color: #64748b; }
+
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background: var(--bg); 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            color: var(--text);
+        }
+
+        .card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            width: 100%; 
+            max-width: 500px; 
+            margin-bottom: 20px; 
+            border: 1px solid #e2e8f0; 
+        }
+
+        h2, h3 { margin-top: 0; color: var(--text); }
+
+        .grid-inputs { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+            margin-bottom: 15px; 
+        }
+
+        label { font-size: 0.8rem; font-weight: bold; color: #64748b; }
+
+        input { 
+            padding: 10px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 6px; 
+            width: 100%; 
+            box-sizing: border-box; 
+            font-size: 1rem;
+        }
+
+        button { 
+            cursor: pointer; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            transition: 0.2s; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px;
+        }
+
+        button:active { transform: scale(0.98); }
+
+        .btn-ponto { background: var(--primary); color: white; width: 100%; margin-bottom: 10px; font-size: 1rem; }
+        .btn-save { background: var(--text); color: white; width: 100%; }
+        .btn-excel { background: var(--success); color: white; width: 100%; margin-top: 10px; }
+        .btn-clear { background: transparent; color: var(--danger); font-size: 0.8rem; text-decoration: underline; margin-top: 10px; }
+
+        .countdown { 
+            font-size: 1.8rem; 
+            font-weight: 800; 
+            color: var(--primary); 
+            text-align: center; 
+            margin: 15px 0; 
+            font-variant-numeric: tabular-nums;
+        }
+
+        .status { text-align: center; font-size: 0.9rem; color: #64748b; background: #f1f5f9; padding: 10px; border-radius: 6px; }
+
         .history-grid { display: grid; gap: 10px; width: 100%; max-width: 500px; }
-        .day-card { background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; }
-        .positive { border-left-color: var(--success); color: var(--success); }
-        .negative { border-left-color: var(--danger); color: var(--danger); }
+
+        .day-card { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            border-left: 5px solid #cbd5e1; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .positive { border-left-color: var(--success); }
+        .negative { border-left-color: var(--danger); }
+        .saldo-val { font-weight: bold; }
+        .positive .saldo-val { color: var(--success); }
+        .negative .saldo-val { color: var(--danger); }
     </style>
 </head>
 <body>
 
     <div class="card">
         <h2>⏱️ Registro de Ponto</h2>
-        <button class="btn-ponto" onclick="marcarPontoRapido()">Bater Ponto Agora</button>
+        <button class="btn-ponto" onclick="marcarPontoRapido()">📍 Bater Ponto Agora</button>
         
         <div class="grid-inputs">
             <div><label>Entrada</label><input type="time" id="entrada" oninput="calcular()"></div>
@@ -41,102 +120,157 @@
             <div><label>Saída Final</label><input type="time" id="saida" oninput="calcular()"></div>
         </div>
 
-        <div class="countdown" id="timer">Restam: --:--:--</div>
+        <div class="countdown" id="timer">00:00:00</div>
         <div class="status" id="infoSaida">Preencha a entrada para prever a saída</div>
-        <button onclick="salvarDia()" style="margin-top: 15px; width: 100%; background: #1e293b; color: white;">Salvar no Histórico</button>
+        
+        <button onclick="salvarDia()" class="btn-save" style="margin-top: 15px;">💾 Salvar no Histórico</button>
     </div>
 
-    <div class="card">
-        <h3>📊 Banco de Horas (Semanal)</h3>
-        <div id="saldoGeral" style="font-size: 1.2rem; font-weight: bold;">Saldo: 00:00</div>
+    <div class="card" style="text-align: center;">
+        <h3>📊 Banco de Horas</h3>
+        <div id="saldoGeral" style="font-size: 1.5rem; font-weight: bold;">Total: 0h 0m</div>
+        <button onclick="exportarExcel()" class="btn-excel">📥 Exportar Excel (.csv)</button>
+        <button onclick="limparHistorico()" class="btn-clear">Limpar todo o histórico</button>
     </div>
 
-    <div class="history-grid" id="historico">
-        </div>
+    <div class="history-grid" id="historico"></div>
 
     <script>
-        const JORNADA_DIARIA = 8 * 60; // 8 horas em minutos
+        const JORNADA_MINUTOS = 8 * 60; 
+
+        // Converte "HH:MM" para minutos totais
+        function paraMinutos(horario) {
+            if (!horario) return 0;
+            const [h, m] = horario.split(':').map(Number);
+            return (h * 60) + m;
+        }
+
+        // Converte minutos totais para "HH:MM"
+        function paraHHMM(minutos) {
+            const sinal = minutos < 0 ? "-" : "";
+            const absMin = Math.abs(minutos);
+            const h = Math.floor(absMin / 60);
+            const m = absMin % 60;
+            return `${sinal}${h}h ${m}m`;
+        }
 
         function calcular() {
-            const e = document.getElementById('entrada').value;
-            const as = document.getElementById('almocoSai').value;
-            const av = document.getElementById('almocoVolta').value;
-            const s = document.getElementById('saida').value;
-
-            if (e) {
-                // Cálculo de previsão de saída (Entrada + 8h + 1h almoço padrão ou real)
-                let [h, m] = e.split(':').map(Number);
-                let previsaoMinutos = (h * 60) + m + JORNADA_DIARIA + 60; 
-                let pH = Math.floor(previsaoMinutos / 60);
-                let pM = previsaoMinutos % 60;
-                document.getElementById('infoSaida').innerText = `Saída prevista (com 1h de intervalo): ${String(pH).padStart(2, '0')}:${String(pM).padStart(2, '0')}`;
+            const ent = document.getElementById('entrada').value;
+            if (ent) {
+                const previsao = paraMinutos(ent) + JORNADA_MINUTOS + 60; // +1h almoço
+                const h = Math.floor(previsao / 60);
+                const m = previsao % 60;
+                document.getElementById('infoSaida').innerText = `Saída prevista (jornada 8h + 1h almoço): ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
             }
         }
 
         function atualizarRegressivo() {
-            const e = document.getElementById('entrada').value;
-            if (!e) return;
+            const ent = document.getElementById('entrada').value;
+            if (!ent) return;
 
-            let agora = new Date();
-            let [h, m] = e.split(':').map(Number);
-            let entrada = new Date();
-            entrada.setHours(h, m, 0);
+            const agora = new Date();
+            const hojeEntrada = new Date();
+            const [h, m] = ent.split(':').map(Number);
+            hojeEntrada.setHours(h, m, 0);
 
-            // Tempo alvo: Entrada + 8h de trabalho + 1h de almoço
-            let alvo = new Date(entrada.getTime() + (9 * 60 * 60 * 1000));
-            let diff = alvo - agora;
+            // Alvo = Entrada + 8h trabalho + 1h almoço
+            const alvo = new Date(hojeEntrada.getTime() + (9 * 60 * 60 * 1000));
+            const diffMs = alvo - agora;
 
-            if (diff > 0) {
-                let hh = Math.floor(diff / 1000 / 60 / 60);
-                let mm = Math.floor((diff / 1000 / 60) % 60);
-                let ss = Math.floor((diff / 1000) % 60);
-                document.getElementById('timer').innerText = `Restam: ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
+            if (diffMs > 0) {
+                const hh = Math.floor(diffMs / 3600000);
+                const mm = Math.floor((diffMs % 3600000) / 60000);
+                const ss = Math.floor((diffMs % 60000) / 1000);
+                document.getElementById('timer').innerText = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
+                document.getElementById('timer').style.color = "var(--primary)";
             } else {
-                document.getElementById('timer').innerText = "Jornada Concluída!";
+                document.getElementById('timer').innerText = "HORA DE SAIR!";
+                document.getElementById('timer').style.color = "var(--success)";
             }
         }
 
         function marcarPontoRapido() {
             const agora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            if (!document.getElementById('entrada').value) document.getElementById('entrada').value = agora;
-            else if (!document.getElementById('almocoSai').value) document.getElementById('almocoSai').value = agora;
-            else if (!document.getElementById('almocoVolta').value) document.getElementById('almocoVolta').value = agora;
-            else if (!document.getElementById('saida').value) document.getElementById('saida').value = agora;
+            const campos = ['entrada', 'almocoSai', 'almocoVolta', 'saida'];
+            for (let id of campos) {
+                if (!document.getElementById(id).value) {
+                    document.getElementById(id).value = agora;
+                    break;
+                }
+            }
             calcular();
         }
 
         function salvarDia() {
-            const dados = {
-                data: new Date().toLocaleDateString(),
+            const e = paraMinutos(document.getElementById('entrada').value);
+            const as = paraMinutos(document.getElementById('almocoSai').value);
+            const av = paraMinutos(document.getElementById('almocoVolta').value);
+            const s = paraMinutos(document.getElementById('saida').value);
+
+            if (!e || !s) return alert("Preencha ao menos Entrada e Saída!");
+
+            const intervalo = (av - as) > 0 ? (av - as) : 60;
+            const trabalhado = (s - e) - intervalo;
+            const saldoDia = trabalhado - JORNADA_MINUTOS;
+
+            const registro = {
+                data: new Date().toLocaleDateString('pt-BR'),
                 entrada: document.getElementById('entrada').value,
                 saida: document.getElementById('saida').value,
-                // Lógica simplificada de saldo
-                saldo: Math.floor(Math.random() * 40) - 20 // Simulação para exemplo
+                saldo: saldoDia
             };
+
+            let hist = JSON.parse(localStorage.getItem('ponto_db') || '[]');
+            hist.push(registro);
+            localStorage.setItem('ponto_db', JSON.stringify(hist));
             
-            let historico = JSON.parse(localStorage.getItem('ponto_db') || '[]');
-            historico.push(dados);
-            localStorage.setItem('ponto_db', JSON.stringify(historico));
             renderizarHistorico();
+            alert("Dia salvo com sucesso!");
         }
 
         function renderizarHistorico() {
             const hist = JSON.parse(localStorage.getItem('ponto_db') || '[]');
             const container = document.getElementById('historico');
+            let saldoTotal = 0;
             container.innerHTML = '';
-            
-            hist.reverse().slice(0,5).forEach(dia => {
-                const classe = dia.saldo >= 0 ? 'positive' : 'negative';
+
+            hist.slice().reverse().forEach(dia => {
+                saldoTotal += dia.saldo;
+                const tipo = dia.saldo >= 0 ? 'positive' : 'negative';
                 container.innerHTML += `
-                    <div class="day-card ${classe}">
+                    <div class="day-card ${tipo}">
                         <div>
-                            <strong>${dia.data}</strong><br>
-                            <small>${dia.entrada} ⮕ ${dia.saida || '--:--'}</small>
+                            <strong>📅 ${dia.data}</strong><br>
+                            <small>🕒 ${dia.entrada} ➔ ${dia.saida}</small>
                         </div>
-                        <div>${dia.saldo > 0 ? '+' : ''}${dia.saldo} min</div>
+                        <div class="saldo-val">${dia.saldo >= 0 ? '+' : ''}${dia.saldo} min</div>
                     </div>
                 `;
             });
+
+            document.getElementById('saldoGeral').innerText = `Total: ${paraHHMM(saldoTotal)}`;
+            document.getElementById('saldoGeral').style.color = saldoTotal >= 0 ? "var(--success)" : "var(--danger)";
+        }
+
+        function exportarExcel() {
+            const hist = JSON.parse(localStorage.getItem('ponto_db') || '[]');
+            if (hist.length === 0) return alert("Sem dados!");
+
+            let csv = "\ufeffData;Entrada;Saida;Saldo(min)\n";
+            hist.forEach(d => csv += `${d.data};${d.entrada};${d.saida};${d.saldo}\n`);
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "relatorio_ponto.csv");
+            link.click();
+        }
+
+        function limparHistorico() {
+            if (confirm("Tem certeza que deseja apagar todos os registros?")) {
+                localStorage.removeItem('ponto_db');
+                renderizarHistorico();
+            }
         }
 
         setInterval(atualizarRegressivo, 1000);
