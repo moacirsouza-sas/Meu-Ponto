@@ -4,33 +4,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ponto Pro - Versão Auditoria</title>
+    <title>Ponto Pro - Sistema de Auditoria</title>
     <style>
-        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --bg: #f8fafc; --text: #1e293b; --locked: #e2e8f0; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 20px; display: flex; flex-direction: column; align-items: center; color: var(--text); }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); width: 100%; max-width: 500px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        input, button { padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; width: 100%; box-sizing: border-box; font-size: 1rem; }
+        :root { 
+            --primary: #2563eb; 
+            --success: #16a34a; 
+            --danger: #dc2626; 
+            --bg: #f8fafc; 
+            --text: #1e293b; 
+            --locked: #e2e8f0; 
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg); 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            color: var(--text); 
+            margin: 0;
+        }
+
+        .card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            width: 100%; 
+            max-width: 500px; 
+            margin-bottom: 20px; 
+            border: 1px solid #e2e8f0; 
+            box-sizing: border-box;
+        }
+
+        h2, h3 { margin-top: 0; color: var(--text); text-align: center; }
+
+        .grid-inputs { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+            margin-bottom: 15px; 
+        }
+
+        label { display: block; margin-bottom: 4px; font-weight: 600; }
+
+        input, button { 
+            padding: 12px; 
+            border-radius: 8px; 
+            border: 1px solid #cbd5e1; 
+            width: 100%; 
+            box-sizing: border-box; 
+            font-size: 1rem; 
+        }
+
         input:read-only { background-color: var(--locked); color: #64748b; cursor: not-allowed; }
-        button { cursor: pointer; font-weight: bold; transition: 0.2s; border: none; }
-        .btn-ponto { background: var(--primary); color: white; margin-bottom: 10px; }
-        .btn-ponto:disabled { opacity: 0.5; cursor: wait; }
+
+        button { 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: 0.2s; 
+            border: none; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px;
+        }
+
+        .btn-ponto { background: var(--primary); color: white; margin-bottom: 10px; height: 50px; }
+        .btn-ponto:disabled { opacity: 0.6; cursor: wait; }
+        .btn-ponto:active { transform: scale(0.98); }
+
         .btn-save { background: var(--text); color: white; }
-        .countdown { font-size: 2rem; font-weight: 800; color: var(--primary); text-align: center; margin: 15px 0; font-family: 'Courier New', Courier, monospace; }
-        .status { text-align: center; font-size: 0.85rem; color: #64748b; background: #f1f5f9; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
-        .geo-info { font-size: 0.7rem; color: #94a3b8; margin-top: 5px; text-align: center; }
-        .photo-area { margin-top: 15px; border: 2px dashed #cbd5e1; padding: 10px; border-radius: 8px; text-align: center; background: #fff; }
-        #preview { max-width: 100%; border-radius: 8px; margin-top: 10px; display: none; max-height: 150px; object-fit: contain; }
+        .btn-export { background: var(--success); color: white; flex: 2; }
+        .btn-reset { background: #ef4444; color: white; flex: 1; }
+
+        .countdown { 
+            font-size: 2.2rem; 
+            font-weight: 800; 
+            color: var(--primary); 
+            text-align: center; 
+            margin: 15px 0; 
+            font-family: 'Courier New', Courier, monospace; 
+        }
+
+        .status { 
+            text-align: center; 
+            font-size: 0.85rem; 
+            color: #64748b; 
+            background: #f1f5f9; 
+            padding: 10px; 
+            border-radius: 6px; 
+            margin-bottom: 10px; 
+            border: 1px solid #e2e8f0; 
+        }
+
+        .geo-info { 
+            font-size: 0.75rem; 
+            color: #94a3b8; 
+            text-align: center; 
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .photo-area { 
+            margin-top: 15px; 
+            border: 2px dashed #cbd5e1; 
+            padding: 15px; 
+            border-radius: 8px; 
+            text-align: center; 
+            background: #fff; 
+        }
+
+        #preview { 
+            max-width: 100%; 
+            border-radius: 8px; 
+            margin-top: 10px; 
+            display: none; 
+            max-height: 150px; 
+            object-fit: contain; 
+        }
+
         .history-grid { display: grid; gap: 10px; width: 100%; max-width: 500px; }
-        .day-card { background: white; padding: 12px; border-radius: 8px; border-left: 5px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
-        .img-thumb { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; border: 1px solid #ddd; }
+
+        .day-card { 
+            background: white; 
+            padding: 12px; 
+            border-radius: 8px; 
+            border-left: 5px solid #cbd5e1; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+
+        .img-thumb { 
+            width: 45px; 
+            height: 45px; 
+            border-radius: 6px; 
+            object-fit: cover; 
+            border: 1px solid #ddd; 
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>⏱️ Ponto Pro - Auditoria</h2>
-        <button id="btnPrincipal" class="btn-ponto" onclick="registrarPontoOficial()">📍 Registrar Agora (Hora Oficial)</button>
+        <h2>⏱️ Ponto Pro</h2>
+        <button id="btnPrincipal" class="btn-ponto" onclick="registrarPonto()">
+            📍 Registrar Agora (Validar GPS)
+        </button>
         
         <div class="grid-inputs">
             <div><label><small>Entrada</small></label><input type="time" id="entrada" readonly></div>
@@ -40,24 +164,26 @@
         </div>
 
         <div class="countdown" id="timer">00:00:00</div>
-        <div class="status" id="infoSaida">Sincronizando geolocalização...</div>
-        <div id="geoDisplay" class="geo-info">Aguardando coordenadas...</div>
+        <div class="status" id="infoSaida">Aguardando primeiro registro...</div>
+        <div id="geoDisplay" class="geo-info">Localização pendente para o registro.</div>
 
         <div class="photo-area">
             <input type="file" id="fotoInput" accept="image/*" capture="environment" style="display:none">
-            <button onclick="document.getElementById('fotoInput').click()" style="background:#f1f5f9; color:#475569; border: 1px solid #cbd5e1;">📷 Foto do Comprovante</button>
+            <button onclick="document.getElementById('fotoInput').click()" style="background:#f1f5f9; color:#475569; border: 1px solid #cbd5e1;">
+                📷 Foto do Comprovante
+            </button>
             <img id="preview">
         </div>
         
         <button onclick="finalizarDia()" class="btn-save" style="margin-top: 15px;">💾 Finalizar e Arquivar Dia</button>
     </div>
 
-    <div class="card" style="text-align: center;">
+    <div class="card">
         <h3>📊 Banco de Horas Acumulado</h3>
-        <div id="saldoGeral" style="font-size: 1.8rem; font-weight: bold;">0h 0m</div>
+        <div id="saldoGeral" style="font-size: 1.8rem; font-weight: bold; text-align: center;">0h 0m</div>
         <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button onclick="exportarExcel()" style="background: var(--success); color: white; flex: 2;">📥 Exportar CSV</button>
-            <button onclick="limparHistorico()" style="background: #ef4444; color: white; flex: 1;">🗑️ Reset</button>
+            <button onclick="exportarExcel()" class="btn-export">📥 Exportar CSV</button>
+            <button onclick="limparHistorico()" class="btn-reset">🗑️ Reset</button>
         </div>
     </div>
 
@@ -65,87 +191,81 @@
 
     <script>
         let base64Image = "";
-        let currentGeo = "Pendente";
+        let currentGeo = "Não capturada";
         const campos = ['entrada', 'almocoSai', 'almocoVolta', 'saida'];
 
         window.onload = () => {
             const rascunho = JSON.parse(localStorage.getItem('rascunho_ponto') || '{}');
             campos.forEach(id => {
-                if (rascunho[id]) {
-                    document.getElementById(id).value = rascunho[id];
-                }
+                if (rascunho[id]) document.getElementById(id).value = rascunho[id];
             });
             if (rascunho.foto) {
                 base64Image = rascunho.foto;
                 const p = document.getElementById('preview');
                 p.src = base64Image; p.style.display = 'block';
             }
-            capturarGeoEIP();
             renderizarHistorico();
             calcular();
         };
 
-        // Captura de Geo e IP
-        async function capturarGeoEIP() {
-            try {
-                const ipRes = await fetch('https://api.ipify.org?format=json');
-                const ipData = await ipRes.json();
-                const ip = ipData.ip;
-
-                if ("geolocation" in navigator) {
-                    navigator.geolocation.getCurrentPosition(pos => {
-                        currentGeo = `IP: ${ip} | Lat: ${pos.coords.latitude.toFixed(4)}, Lon: ${pos.coords.longitude.toFixed(4)}`;
-                        document.getElementById('geoDisplay').innerText = currentGeo;
-                        document.getElementById('infoSaida').innerText = "Sistema pronto.";
-                    }, () => {
-                        currentGeo = `IP: ${ip} | GPS Negado`;
-                        document.getElementById('geoDisplay').innerText = currentGeo;
-                    });
-                }
-            } catch (e) {
-                currentGeo = "Erro de conexão";
-            }
-        }
-
-        // Busca hora oficial de Brasília
-        async function obterHoraOficial() {
-            try {
-                const res = await fetch('https://worldtimeapi.org/api/timezone/America/Sao_Paulo');
-                const data = await res.json();
-                // Retorna apenas HH:MM
-                return data.datetime.split('T')[1].substring(0, 5);
-            } catch (e) {
-                console.warn("Falha na API de hora, usando hora local.");
-                return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            }
-        }
-
-        async function registrarPontoOficial() {
+        // Função Principal: GPS + Registro
+        function registrarPonto() {
             const btn = document.getElementById('btnPrincipal');
             btn.disabled = true;
-            btn.innerText = "⌛ Consultando servidor...";
+            btn.innerText = "🛰️ Validando GPS...";
 
-            const horaOficial = await obterHoraOficial();
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        currentGeo = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+                        document.getElementById('geoDisplay').innerText = `📍 Localização confirmada: ${currentGeo}`;
+                        executarBatidaPonto();
+                    },
+                    (error) => {
+                        alert("ERRO: O acesso ao GPS é obrigatório para registrar o ponto.");
+                        console.error(error);
+                        resetBotaoPrincipal();
+                    },
+                    { enableHighAccuracy: true, timeout: 8000 }
+                );
+            } else {
+                alert("Seu navegador não suporta geolocalização.");
+                resetBotaoPrincipal();
+            }
+        }
+
+        function executarBatidaPonto() {
+            const agora = new Date();
+            const horaFormatada = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             
+            let campoPreenchido = false;
             for (let id of campos) {
                 const el = document.getElementById(id);
                 if (!el.value) {
-                    el.value = horaOficial;
+                    el.value = horaFormatada;
                     el.style.backgroundColor = "#dcfce7";
                     
-                    // Salva rascunho
+                    // Salva no rascunho local
                     const rascunho = JSON.parse(localStorage.getItem('rascunho_ponto') || '{}');
-                    rascunho[id] = horaOficial;
+                    rascunho[id] = horaFormatada;
                     rascunho.foto = base64Image;
+                    rascunho.ultimoGeo = currentGeo;
                     localStorage.setItem('rascunho_ponto', JSON.stringify(rascunho));
                     
+                    campoPreenchido = true;
                     break;
                 }
             }
             
-            btn.disabled = false;
-            btn.innerText = "📍 Registrar Agora (Hora Oficial)";
+            if (!campoPreenchido) alert("Todos os horários de hoje já foram registrados.");
+            resetBotaoPrincipal();
             calcular();
+        }
+
+        function resetBotaoPrincipal() {
+            const btn = document.getElementById('btnPrincipal');
+            btn.disabled = false;
+            btn.innerText = "📍 Registrar Agora (Validar GPS)";
         }
 
         function processarImagem(file) {
@@ -174,22 +294,24 @@
             const ent = document.getElementById('entrada').value;
             if (ent) {
                 const [h, m] = ent.split(':').map(Number);
-                const previsaoMin = (h * 60) + m + 540; 
-                document.getElementById('infoSaida').innerText = `Saída prevista: ${String(Math.floor(previsaoMin/60)).padStart(2,'0')}:${String(previsaoMin%60).padStart(2,'0')}`;
+                const prevMin = (h * 60) + m + 540; // 8h trab + 1h almoço
+                document.getElementById('infoSaida').innerText = `Saída prevista (9h total): ${String(Math.floor(prevMin/60)).padStart(2,'0')}:${String(prevMin%60).padStart(2,'0')}`;
             }
         }
 
         function finalizarDia() {
             const ent = document.getElementById('entrada').value;
             const sai = document.getElementById('saida').value;
-            if (!ent || !sai) return alert("Erro: Entrada e Saída Final são obrigatórias.");
+            if (!ent || !sai) return alert("Preencha ao menos Entrada e Saída Final.");
 
             const hoje = new Date().toLocaleDateString('pt-BR');
+            const minTrabalhados = ((new Date(`1970-01-01T${sai}:00`) - new Date(`1970-01-01T${ent}:00`)) / 60000) - 60;
+            
             const registro = {
                 data: hoje,
                 entrada: ent, 
                 saida: sai, 
-                saldo: ((new Date(`1970-01-01T${sai}:00`) - new Date(`1970-01-01T${ent}:00`)) / 60000) - 60 - 480, 
+                saldo: minTrabalhados - 480, // Comparado a 8h úteis
                 foto: base64Image,
                 geo: currentGeo
             };
@@ -210,17 +332,16 @@
             hist.slice().reverse().forEach(dia => {
                 totalMinutos += dia.saldo;
                 const cor = dia.saldo >= 0 ? 'var(--success)' : 'var(--danger)';
-                const fotoHtml = dia.foto ? `<img src="${dia.foto}" class="img-thumb" onclick="window.open(this.src)">` : '🚫';
                 container.innerHTML += `
                     <div class="day-card" style="border-left-color: ${cor}">
                         <div style="max-width: 70%;">
                             <strong>${dia.data}</strong><br>
                             <small>${dia.entrada} ➔ ${dia.saida}</small><br>
-                            <span style="font-size:0.55rem; color:#94a3b8; display:block; line-height:1">${dia.geo || ''}</span>
+                            <span style="font-size:0.6rem; color:#94a3b8; display:block;">📍 ${dia.geo}</span>
                         </div>
                         <div style="display:flex; align-items:center; gap:8px">
-                            ${fotoHtml}
-                            <span style="color:${cor}; font-weight:bold; font-size: 0.9rem;">${dia.saldo > 0 ? '+' : ''}${dia.saldo}m</span>
+                            ${dia.foto ? `<img src="${dia.foto}" class="img-thumb" onclick="window.open(this.src)">` : ''}
+                            <span style="color:${cor}; font-weight:bold;">${dia.saldo > 0 ? '+' : ''}${dia.saldo}m</span>
                         </div>
                     </div>`;
             });
@@ -234,19 +355,23 @@
         function exportarExcel() {
             const hist = JSON.parse(localStorage.getItem('ponto_db') || '[]');
             if(hist.length === 0) return alert("Sem dados.");
-            let csv = "\ufeffData;Entrada;Saida;Saldo;Geo_IP\n";
+            let csv = "\ufeffData;Entrada;Saida;Saldo;Localizacao\n";
             hist.forEach(d => csv += `${d.data};${d.entrada};${d.saida};${d.saldo};${d.geo}\n`);
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `ponto_oficial.csv`;
+            link.download = `ponto_auditoria.csv`;
             link.click();
         }
 
         function limparHistorico() {
-            if(confirm("Apagar histórico permanente?")) { localStorage.clear(); location.reload(); }
+            if(confirm("Deseja apagar TODO o histórico permanentemente?")) { 
+                localStorage.clear(); 
+                location.reload(); 
+            }
         }
 
+        // Timer de Contagem Regressiva
         setInterval(() => {
             const ent = document.getElementById('entrada').value;
             if(ent) {
@@ -267,4 +392,5 @@
     </script>
 </body>
 </html>
+
 
