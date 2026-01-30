@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ponto Pro | Sistema de Auditoria V7</title>
+    <title>Ponto Pro | Auditoria & Controle V8</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -55,7 +55,7 @@
             font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -79,7 +79,7 @@
             border-radius: 14px;
             padding: 12px;
             position: relative;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: 0.3s;
         }
 
         .input-box.unlocked {
@@ -144,7 +144,35 @@
             margin-top: 8px;
         }
 
-        .history-title { font-size: 1rem; font-weight: 700; margin-bottom: 12px; width: 100%; }
+        .btn-finish {
+            width: 100%;
+            padding: 16px;
+            background: var(--text-main);
+            color: white;
+            border-radius: 14px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 12px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-reset-day {
+            width: 100%;
+            padding: 10px;
+            background: transparent;
+            color: var(--danger);
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 1px dashed var(--danger);
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .btn-reset-day:hover { background: #fef2f2; }
+
+        .history-title { font-size: 1rem; font-weight: 700; margin: 20px 0 12px 0; width: 100%; }
         
         .day-card {
             background: white;
@@ -155,6 +183,7 @@
             justify-content: space-between;
             align-items: center;
             border: 1px solid var(--border);
+            width: 100%;
         }
 
         .saldo-badge {
@@ -162,17 +191,6 @@
             border-radius: 10px;
             font-size: 0.75rem;
             font-weight: 700;
-        }
-
-        .btn-finish {
-            width: 100%;
-            padding: 16px;
-            background: var(--text-main);
-            color: white;
-            border-radius: 14px;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
         }
     </style>
 </head>
@@ -213,15 +231,15 @@
             </div>
 
             <div class="timer-section">
-                <p style="font-size: 0.65rem; color: var(--text-sub); font-weight: 800; letter-spacing: 0.5px;">TEMPO RESTANTE</p>
                 <div id="timer">00:00:00</div>
-                <div id="geoDisplay" class="geo-badge">GPS Necessário</div>
+                <div id="geoDisplay" class="geo-badge">GPS Obrigatório</div>
             </div>
 
             <button class="btn-finish" onclick="arquivarDia()">Arquivar Registro do Dia</button>
+            <button class="btn-reset-day" onclick="resetarRascunho()">⚠️ Resetar Registro de Hoje</button>
         </div>
 
-        <h3 class="history-title">Histórico de Ponto</h3>
+        <h3 class="history-title">Histórico Recente</h3>
         <div id="lista-historico"></div>
     </div>
 
@@ -232,7 +250,7 @@
         document.getElementById('display-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
 
         window.onload = () => {
-            const rascunho = JSON.parse(localStorage.getItem('ponto_v7_save') || '{}');
+            const rascunho = JSON.parse(localStorage.getItem('ponto_v8_save') || '{}');
             registroGeos = rascunho.geos || {};
             
             CAMPOS.forEach(id => {
@@ -249,12 +267,7 @@
 
         function processarGeolocalizacao(modo, alvo = null) {
             const status = document.getElementById('geoDisplay');
-            status.innerHTML = "<span>🛰️</span> Buscando localização...";
-
-            if (!navigator.geolocation) {
-                alert("GPS não suportado neste navegador.");
-                return;
-            }
+            status.innerHTML = "<span>🛰️</span> Capturando GPS...";
 
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
@@ -268,8 +281,8 @@
                     }
                 },
                 (err) => {
-                    alert("Ação Bloqueada: É obrigatório permitir o acesso ao GPS para registrar o ponto.");
-                    status.innerHTML = "<span>❌</span> GPS Obrigatório";
+                    alert("Erro: O GPS é obrigatório para registrar ou editar o ponto.");
+                    status.innerHTML = "<span>❌</span> GPS Necessário";
                 },
                 { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
@@ -297,44 +310,47 @@
             document.getElementById(`box-${id}`).classList.add('unlocked');
             registroGeos[id] = `Manual: ${geo}`;
             salvarRascunho();
-            alert("Localização confirmada! Campo liberado para ajuste.");
+            alert("Localização validada! Edição liberada.");
         }
 
         function salvarRascunho() {
             const data = { geos: registroGeos };
             CAMPOS.forEach(id => data[id] = document.getElementById(id).value);
-            localStorage.setItem('ponto_v7_save', JSON.stringify(data));
+            localStorage.setItem('ponto_v8_save', JSON.stringify(data));
+        }
+
+        function resetarRascunho() {
+            if (confirm("Deseja apagar os registros de hoje? (O histórico arquivado não será afetado)")) {
+                localStorage.removeItem('ponto_v8_save');
+                location.reload();
+            }
         }
 
         function arquivarDia() {
             const ent = document.getElementById('entrada').value;
             const sai = document.getElementById('saida').value;
-            if (!ent || !sai) return alert("Pelo menos Entrada e Saída são necessárias.");
+            if (!ent || !sai) return alert("Entrada e Saída são obrigatórias.");
 
-            const db = JSON.parse(localStorage.getItem('ponto_v7_db') || '[]');
+            const db = JSON.parse(localStorage.getItem('ponto_v8_db') || '[]');
             const diff = (new Date(`1970-01-01T${sai}`) - new Date(`1970-01-01T${ent}`)) / 60000;
             
             db.push({
                 data: new Date().toLocaleDateString('pt-BR'),
                 entrada: ent,
                 saida: sai,
-                geoLogs: registroGeos,
                 saldo: diff - 540 
             });
 
-            localStorage.setItem('ponto_v7_db', JSON.stringify(db));
-            localStorage.removeItem('ponto_v7_save');
+            localStorage.setItem('ponto_v8_db', JSON.stringify(db));
+            localStorage.removeItem('ponto_v8_save');
             location.reload();
         }
 
         function renderizarHistorico() {
-            const db = JSON.parse(localStorage.getItem('ponto_v7_db') || '[]');
+            const db = JSON.parse(localStorage.getItem('ponto_v8_db') || '[]');
             document.getElementById('lista-historico').innerHTML = db.reverse().map(i => `
                 <div class="day-card">
-                    <div class="day-info">
-                        <strong>${i.data}</strong>
-                        <p>${i.entrada} • ${i.saida}</p>
-                    </div>
+                    <div><strong>${i.data}</strong><br><small>${i.entrada} • ${i.saida}</small></div>
                     <div class="saldo-badge" style="background: ${i.saldo >= 0 ? '#ecfdf5' : '#fef2f2'}; color: ${i.saldo >= 0 ? '#10b981' : '#ef4444'}">
                         ${i.saldo >= 0 ? '+' : ''}${i.saldo}m
                     </div>
@@ -349,10 +365,9 @@
                     const [h, m] = ent.split(':');
                     const meta = new Date(); meta.setHours(parseInt(h) + 9, parseInt(m), 0);
                     const diff = meta - new Date();
-                    if (diff > 0) {
-                        document.getElementById('timer').innerText = new Date(diff).toISOString().substr(11, 8);
-                    } else {
-                        document.getElementById('timer').innerText = "CONCLUÍDO";
+                    if (diff > 0) document.getElementById('timer').innerText = new Date(diff).toISOString().substr(11, 8);
+                    else {
+                        document.getElementById('timer').innerText = "LIBERADO";
                         document.getElementById('timer').style.color = "var(--success)";
                     }
                 }
@@ -361,6 +376,7 @@
     </script>
 </body>
 </html>
+
 
 
 
