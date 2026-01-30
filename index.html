@@ -4,107 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Ponto Inteligente</title>
+    <title>Meu Ponto Inteligente + Proteção</title>
     <style>
-        :root {
-            --primary: #2563eb;
-            --success: #16a34a;
-            --danger: #dc2626;
-            --warning: #f59e0b;
-            --bg: #f8fafc;
-            --text: #1e293b;
-        }
-
-        body { 
-            font-family: 'Segoe UI', system-ui, sans-serif; 
-            background: var(--bg); 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            color: var(--text);
-        }
-
-        .card { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
-            width: 100%; 
-            max-width: 500px; 
-            margin-bottom: 20px; 
-            border: 1px solid #e2e8f0; 
-        }
-
-        h2, h3 { margin-top: 0; color: var(--text); }
-
-        .grid-inputs { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
-            margin-bottom: 15px; 
-        }
-
-        label { font-size: 0.8rem; font-weight: bold; color: #64748b; }
-
-        input { 
-            padding: 10px; 
-            border: 1px solid #cbd5e1; 
-            border-radius: 6px; 
-            width: 100%; 
-            box-sizing: border-box; 
-            font-size: 1rem;
-        }
-
-        button { 
-            cursor: pointer; 
-            padding: 12px; 
-            border: none; 
-            border-radius: 6px; 
-            font-weight: bold; 
-            transition: 0.2s; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 8px;
-        }
-
-        button:active { transform: scale(0.98); }
-
-        .btn-ponto { background: var(--primary); color: white; width: 100%; margin-bottom: 10px; font-size: 1rem; }
-        .btn-save { background: var(--text); color: white; width: 100%; }
-        .btn-excel { background: var(--success); color: white; width: 100%; margin-top: 10px; }
-        .btn-clear { background: transparent; color: var(--danger); font-size: 0.8rem; text-decoration: underline; margin-top: 10px; }
-
-        .countdown { 
-            font-size: 1.8rem; 
-            font-weight: 800; 
-            color: var(--primary); 
-            text-align: center; 
-            margin: 15px 0; 
-            font-variant-numeric: tabular-nums;
-        }
-
-        .status { text-align: center; font-size: 0.9rem; color: #64748b; background: #f1f5f9; padding: 10px; border-radius: 6px; }
-
+        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --bg: #f8fafc; --text: #1e293b; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 20px; display: flex; flex-direction: column; align-items: center; color: var(--text); }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); width: 100%; max-width: 500px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        input, button { padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; width: 100%; box-sizing: border-box; }
+        button { cursor: pointer; font-weight: bold; transition: 0.2s; border: none; }
+        .btn-ponto { background: var(--primary); color: white; margin-bottom: 10px; }
+        .btn-save { background: var(--text); color: white; }
+        .countdown { font-size: 1.8rem; font-weight: 800; color: var(--primary); text-align: center; margin: 15px 0; }
+        .status { text-align: center; font-size: 0.85rem; color: #64748b; background: #f1f5f9; padding: 8px; border-radius: 6px; margin-bottom: 10px; }
+        .photo-area { margin-top: 15px; border: 2px dashed #cbd5e1; padding: 10px; border-radius: 8px; text-align: center; }
+        #preview { max-width: 100%; border-radius: 8px; margin-top: 10px; display: none; max-height: 150px; margin-left: auto; margin-right: auto; }
         .history-grid { display: grid; gap: 10px; width: 100%; max-width: 500px; }
-
-        .day-card { 
-            background: white; 
-            padding: 15px; 
-            border-radius: 8px; 
-            border-left: 5px solid #cbd5e1; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        .positive { border-left-color: var(--success); }
-        .negative { border-left-color: var(--danger); }
-        .saldo-val { font-weight: bold; }
-        .positive .saldo-val { color: var(--success); }
-        .negative .saldo-val { color: var(--danger); }
+        .day-card { background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; }
+        .img-thumb { width: 45px; height: 45px; border-radius: 4px; object-fit: cover; cursor: pointer; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
@@ -121,72 +37,55 @@
         </div>
 
         <div class="countdown" id="timer">00:00:00</div>
-        <div class="status" id="infoSaida">Preencha a entrada para prever a saída</div>
+        <div class="status" id="infoSaida">Preencha a entrada</div>
+
+        <div class="photo-area">
+            <label style="font-size: 0.8rem; color: #64748b; display: block; margin-bottom: 5px;">📷 Foto do Comprovante</label>
+            <input type="file" id="fotoInput" accept="image/*" capture="environment" onchange="processarImagem()">
+            <img id="preview" alt="Preview">
+        </div>
         
-        <button onclick="salvarDia()" class="btn-save" style="margin-top: 15px;">💾 Salvar no Histórico</button>
+        <button onclick="salvarDia()" class="btn-save" style="margin-top: 15px;">💾 Salvar Dia no Histórico</button>
     </div>
 
     <div class="card" style="text-align: center;">
         <h3>📊 Banco de Horas</h3>
         <div id="saldoGeral" style="font-size: 1.5rem; font-weight: bold;">Total: 0h 0m</div>
-        <button onclick="exportarExcel()" class="btn-excel">📥 Exportar Excel (.csv)</button>
-        <button onclick="limparHistorico()" class="btn-clear">Limpar todo o histórico</button>
+        <button onclick="exportarExcel()" style="background: var(--success); color: white; margin-top: 10px; width: 100%;">📥 Exportar CSV (Excel)</button>
+        <button onclick="limparHistorico()" style="color: var(--danger); background: none; text-decoration: underline; font-size: 0.8rem; margin-top: 10px;">Limpar tudo</button>
     </div>
 
-    <div class="history-grid" id="historico"></div>
+    <div id="historico" class="history-grid"></div>
 
     <script>
-        const JORNADA_MINUTOS = 8 * 60; 
+        let base64Image = "";
 
-        // Converte "HH:MM" para minutos totais
-        function paraMinutos(horario) {
-            if (!horario) return 0;
-            const [h, m] = horario.split(':').map(Number);
-            return (h * 60) + m;
-        }
+        // PROTEÇÃO: Alerta ao tentar fechar a página
+        window.onbeforeunload = function() {
+            return "Deseja mesmo sair? Verifique se salvou seus dados no histórico.";
+        };
 
-        // Converte minutos totais para "HH:MM"
-        function paraHHMM(minutos) {
-            const sinal = minutos < 0 ? "-" : "";
-            const absMin = Math.abs(minutos);
-            const h = Math.floor(absMin / 60);
-            const m = absMin % 60;
-            return `${sinal}${h}h ${m}m`;
-        }
-
-        function calcular() {
-            const ent = document.getElementById('entrada').value;
-            if (ent) {
-                const previsao = paraMinutos(ent) + JORNADA_MINUTOS + 60; // +1h almoço
-                const h = Math.floor(previsao / 60);
-                const m = previsao % 60;
-                document.getElementById('infoSaida').innerText = `Saída prevista (jornada 8h + 1h almoço): ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-            }
-        }
-
-        function atualizarRegressivo() {
-            const ent = document.getElementById('entrada').value;
-            if (!ent) return;
-
-            const agora = new Date();
-            const hojeEntrada = new Date();
-            const [h, m] = ent.split(':').map(Number);
-            hojeEntrada.setHours(h, m, 0);
-
-            // Alvo = Entrada + 8h trabalho + 1h almoço
-            const alvo = new Date(hojeEntrada.getTime() + (9 * 60 * 60 * 1000));
-            const diffMs = alvo - agora;
-
-            if (diffMs > 0) {
-                const hh = Math.floor(diffMs / 3600000);
-                const mm = Math.floor((diffMs % 3600000) / 60000);
-                const ss = Math.floor((diffMs % 60000) / 1000);
-                document.getElementById('timer').innerText = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
-                document.getElementById('timer').style.color = "var(--primary)";
-            } else {
-                document.getElementById('timer').innerText = "HORA DE SAIR!";
-                document.getElementById('timer').style.color = "var(--success)";
-            }
+        function processarImagem() {
+            const file = document.getElementById('fotoInput').files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function (e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 400;
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    base64Image = canvas.toDataURL('image/jpeg', 0.7);
+                    const p = document.getElementById('preview');
+                    p.src = base64Image; p.style.display = 'block';
+                };
+            };
         }
 
         function marcarPontoRapido() {
@@ -201,80 +100,88 @@
             calcular();
         }
 
+        function calcular() {
+            const ent = document.getElementById('entrada').value;
+            if (ent) {
+                const [h, m] = ent.split(':').map(Number);
+                const previsao = (h * 60) + m + (8 * 60) + 60; 
+                document.getElementById('infoSaida').innerText = `Saída prevista: ${String(Math.floor(previsao/60)).padStart(2,'0')}:${String(previsao%60).padStart(2,'0')}`;
+            }
+        }
+
         function salvarDia() {
-            const e = paraMinutos(document.getElementById('entrada').value);
-            const as = paraMinutos(document.getElementById('almocoSai').value);
-            const av = paraMinutos(document.getElementById('almocoVolta').value);
-            const s = paraMinutos(document.getElementById('saida').value);
+            const ent = document.getElementById('entrada').value;
+            const sai = document.getElementById('saida').value;
+            if (!ent || !sai) return alert("Preencha entrada e saída!");
 
-            if (!e || !s) return alert("Preencha ao menos Entrada e Saída!");
-
-            const intervalo = (av - as) > 0 ? (av - as) : 60;
-            const trabalhado = (s - e) - intervalo;
-            const saldoDia = trabalhado - JORNADA_MINUTOS;
-
+            const minTrabalhados = ((new Date(`1970-01-01T${sai}:00`) - new Date(`1970-01-01T${ent}:00`)) / 60000) - 60;
             const registro = {
                 data: new Date().toLocaleDateString('pt-BR'),
-                entrada: document.getElementById('entrada').value,
-                saida: document.getElementById('saida').value,
-                saldo: saldoDia
+                entrada: ent, saida: sai, saldo: minTrabalhados - 480, foto: base64Image
             };
 
             let hist = JSON.parse(localStorage.getItem('ponto_db') || '[]');
             hist.push(registro);
             localStorage.setItem('ponto_db', JSON.stringify(hist));
             
+            document.getElementById('preview').style.display = "none";
+            base64Image = "";
             renderizarHistorico();
-            alert("Dia salvo com sucesso!");
+            alert("Salvo com sucesso!");
         }
 
         function renderizarHistorico() {
             const hist = JSON.parse(localStorage.getItem('ponto_db') || '[]');
             const container = document.getElementById('historico');
-            let saldoTotal = 0;
-            container.innerHTML = '';
+            let total = 0; container.innerHTML = '';
 
             hist.slice().reverse().forEach(dia => {
-                saldoTotal += dia.saldo;
-                const tipo = dia.saldo >= 0 ? 'positive' : 'negative';
+                total += dia.saldo;
+                const cor = dia.saldo >= 0 ? 'var(--success)' : 'var(--danger)';
+                const fotoHtml = dia.foto ? `<img src="${dia.foto}" class="img-thumb" onclick="window.open(this.src)">` : '<span>-</span>';
                 container.innerHTML += `
-                    <div class="day-card ${tipo}">
-                        <div>
-                            <strong>📅 ${dia.data}</strong><br>
-                            <small>🕒 ${dia.entrada} ➔ ${dia.saida}</small>
-                        </div>
-                        <div class="saldo-val">${dia.saldo >= 0 ? '+' : ''}${dia.saldo} min</div>
-                    </div>
-                `;
+                    <div class="day-card" style="border-left-color: ${cor}">
+                        <div><strong>${dia.data}</strong><br><small>${dia.entrada} ➔ ${dia.saida}</small></div>
+                        <div style="display:flex; align-items:center; gap:10px">${fotoHtml}<span style="color:${cor}; font-weight:bold">${dia.saldo > 0 ? '+' : ''}${dia.saldo}m</span></div>
+                    </div>`;
             });
-
-            document.getElementById('saldoGeral').innerText = `Total: ${paraHHMM(saldoTotal)}`;
-            document.getElementById('saldoGeral').style.color = saldoTotal >= 0 ? "var(--success)" : "var(--danger)";
+            document.getElementById('saldoGeral').innerText = `Total: ${Math.floor(total/60)}h ${Math.abs(total%60)}m`;
+            document.getElementById('saldoGeral').style.color = total >= 0 ? 'var(--success)' : 'var(--danger)';
         }
 
         function exportarExcel() {
             const hist = JSON.parse(localStorage.getItem('ponto_db') || '[]');
-            if (hist.length === 0) return alert("Sem dados!");
-
-            let csv = "\ufeffData;Entrada;Saida;Saldo(min)\n";
+            let csv = "\ufeffData;Entrada;Saida;Saldo\n";
             hist.forEach(d => csv += `${d.data};${d.entrada};${d.saida};${d.saldo}\n`);
-
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", "relatorio_ponto.csv");
+            link.download = "meu_ponto.csv";
             link.click();
         }
 
         function limparHistorico() {
-            if (confirm("Tem certeza que deseja apagar todos os registros?")) {
-                localStorage.removeItem('ponto_db');
-                renderizarHistorico();
-            }
+            if(confirm("Apagar tudo?")) { localStorage.removeItem('ponto_db'); renderizarHistorico(); }
         }
 
-        setInterval(atualizarRegressivo, 1000);
+        setInterval(() => {
+            const ent = document.getElementById('entrada').value;
+            if(ent) {
+                const alvo = new Date();
+                const [h, m] = ent.split(':');
+                alvo.setHours(parseInt(h) + 9, parseInt(m), 0);
+                const diff = alvo - new Date();
+                if(diff > 0) {
+                    const h = Math.floor(diff / 3600000);
+                    const m = Math.floor((diff % 3600000) / 60000);
+                    const s = Math.floor((diff % 60000) / 1000);
+                    document.getElementById('timer').innerText = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                } else { document.getElementById('timer').innerText = "CONCLUÍDO"; }
+            }
+        }, 1000);
+
         renderizarHistorico();
     </script>
 </body>
 </html>
+
