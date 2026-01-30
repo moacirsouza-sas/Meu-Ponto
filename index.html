@@ -4,370 +4,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ponto Pro | Auditoria Inteligente</title>
+    <title>Ponto Pro | Teste de GPS</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #6366f1; /* Indigo */
-            --primary-hover: #4f46e5;
-            --success: #10b981;
-            --danger: #ef4444;
-            --bg: #f3f4f6;
-            --card-bg: #ffffff;
-            --text-main: #111827;
-            --text-sub: #6b7280;
-            --border: #e5e7eb;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text-main);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 450px;
-        }
-
-        /* Card Principal */
-        .card {
-            background: var(--card-bg);
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
-        }
-
-        header { text-align: center; margin-bottom: 24px; }
-        header h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; color: var(--primary); }
-        header p { font-size: 0.875rem; color: var(--text-sub); }
-
-        /* Botão Principal Estilizado */
-        .btn-ponto {
-            width: 100%;
-            height: 64px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
-            margin-bottom: 24px;
-        }
-
-        .btn-ponto:hover { background: var(--primary-hover); transform: translateY(-2px); }
-        .btn-ponto:disabled { background: #9ca3af; transform: none; box-shadow: none; cursor: wait; }
-
-        /* Grid de Inputs */
-        .grid-inputs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .input-box {
-            background: #f9fafb;
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 12px;
-            position: relative;
-            transition: 0.2s;
-        }
-
+        :root { --primary: #6366f1; --success: #10b981; --danger: #ef4444; --bg: #f3f4f6; --card-bg: #ffffff; --text-main: #111827; --text-sub: #6b7280; --border: #e5e7eb; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); color: var(--text-main); padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .app-container { width: 100%; max-width: 450px; }
+        .card { background: var(--card-bg); border-radius: 24px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid var(--border); }
+        .btn-ponto { width: 100%; height: 64px; background: var(--primary); color: white; border: none; border-radius: 16px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4); margin-bottom: 24px; }
+        .btn-ponto:disabled { background: #9ca3af; cursor: wait; box-shadow: none; }
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .input-box { background: #f9fafb; border: 1px solid var(--border); border-radius: 14px; padding: 12px; position: relative; }
         .input-box.unlocked { border-color: var(--success); background: #f0fdf4; }
-
-        .input-box label {
-            display: block;
-            font-size: 0.65rem;
-            font-weight: 800;
-            color: var(--text-sub);
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-
-        .input-box input {
-            width: 100%;
-            border: none;
-            background: transparent;
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-main);
-            outline: none;
-        }
-
-        .edit-trigger {
-            position: absolute;
-            right: 10px;
-            bottom: 12px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            color: var(--primary);
-            padding: 4px;
-        }
-
-        /* Timer e Geo Badge */
-        .timer-section {
-            text-align: center;
-            padding: 16px;
-            background: #f8faff;
-            border-radius: 16px;
-            margin-bottom: 16px;
-        }
-
-        #timer { font-size: 2.25rem; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
-
-        .geo-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            background: #374151;
-            color: #fff;
-            border-radius: 20px;
-            font-size: 0.65rem;
-            font-weight: 600;
-            margin-top: 8px;
-        }
-
-        /* Histórico */
-        .history-title { font-size: 1rem; font-weight: 700; margin-bottom: 12px; padding-left: 4px; }
-        .day-card {
-            background: white;
-            padding: 16px;
-            border-radius: 16px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid var(--border);
-        }
-
-        .day-info strong { font-size: 0.95rem; }
-        .day-info p { font-size: 0.75rem; color: var(--text-sub); }
-
-        .saldo-badge {
-            padding: 6px 10px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-
-        .btn-finish {
-            width: 100%;
-            padding: 16px;
-            background: var(--text-main);
-            color: white;
-            border-radius: 14px;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
+        .input-box label { display: block; font-size: 0.65rem; font-weight: 800; color: var(--text-sub); text-transform: uppercase; margin-bottom: 4px; }
+        .input-box input { width: 100%; border: none; background: transparent; font-size: 1.125rem; font-weight: 600; outline: none; }
+        .edit-trigger { position: absolute; right: 10px; bottom: 12px; cursor: pointer; color: var(--primary); font-size: 1.2rem; }
+        .timer-section { text-align: center; padding: 16px; background: #f8faff; border-radius: 16px; margin-bottom: 16px; }
+        #timer { font-size: 2.25rem; font-weight: 800; color: var(--primary); }
+        .geo-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #374151; color: #fff; border-radius: 20px; font-size: 0.65rem; margin-top: 8px; }
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <header>
-            <h1>Ponto Pro</h1>
-            <p id="current-date">Sexta-feira, 30 de Janeiro</p>
+        <header style="text-align: center; margin-bottom: 20px;">
+            <h1 style="color: var(--primary); font-weight: 800;">Ponto Pro</h1>
+            <p style="color: var(--text-sub); font-size: 0.9rem;">Teste de Auditoria de Localização</p>
         </header>
 
         <div class="card">
-            <button id="btnPrincipal" class="btn-ponto" onclick="requisitarGPS('auto')">
-                <span>📍</span> Registrar Ponto
+            <button id="btnPrincipal" class="btn-ponto" onclick="tentarCapturarGPS('auto')">
+                📍 Registrar Ponto
             </button>
 
             <div class="grid-inputs">
                 <div class="input-box" id="box-entrada">
                     <label>Entrada</label>
-                    <input type="time" id="entrada" readonly onchange="sync()">
-                    <span class="edit-trigger" onclick="requisitarGPS('manual', 'entrada')">✎</span>
-                </div>
-                <div class="input-box" id="box-almocoSai">
-                    <label>Saída Almoço</label>
-                    <input type="time" id="almocoSai" readonly onchange="sync()">
-                    <span class="edit-trigger" onclick="requisitarGPS('manual', 'almocoSai')">✎</span>
-                </div>
-                <div class="input-box" id="box-almocoVolta">
-                    <label>Volta Almoço</label>
-                    <input type="time" id="almocoVolta" readonly onchange="sync()">
-                    <span class="edit-trigger" onclick="requisitarGPS('manual', 'almocoVolta')">✎</span>
+                    <input type="time" id="entrada" readonly>
+                    <span class="edit-trigger" onclick="tentarCapturarGPS('manual', 'entrada')">✎</span>
                 </div>
                 <div class="input-box" id="box-saida">
                     <label>Saída Final</label>
-                    <input type="time" id="saida" readonly onchange="sync()">
-                    <span class="edit-trigger" onclick="requisitarGPS('manual', 'saida')">✎</span>
+                    <input type="time" id="saida" readonly>
+                    <span class="edit-trigger" onclick="tentarCapturarGPS('manual', 'saida')">✎</span>
                 </div>
             </div>
 
             <div class="timer-section">
-                <p style="font-size: 0.7rem; color: var(--text-sub); font-weight: 700;">RESTANTE PARA SAÍDA</p>
                 <div id="timer">00:00:00</div>
-                <div id="geoDisplay" class="geo-badge">Aguardando localização...</div>
+                <div id="geoDisplay" class="geo-badge">GPS: Aguardando Comando</div>
             </div>
-
-            <button class="btn-finish" onclick="finalizar()">Finalizar Expediente</button>
         </div>
-
-        <h3 class="history-title">Registros Recentes</h3>
-        <div id="historico"></div>
     </div>
 
     <script>
-        const ids = ['entrada', 'almocoSai', 'almocoVolta', 'saida'];
-        let logsGeo = {};
-
-        // Inicialização
-        document.getElementById('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
-
-        window.onload = () => {
-            const save = JSON.parse(localStorage.getItem('ponto_v5_save') || '{}');
-            logsGeo = save.geos || {};
-            ids.forEach(id => {
-                if (save[id]) {
-                    const el = document.getElementById(id);
-                    el.value = save[id];
-                    el.readOnly = false;
-                    document.getElementById(`box-${id}`).classList.add('unlocked');
-                }
-            });
-            render();
-            startTimer();
-        };
-
-        async function requisitarGPS(modo, target = null) {
+        function tentarCapturarGPS(modo, campoID = null) {
             const btn = document.getElementById('btnPrincipal');
-            btn.disabled = true;
-            btn.innerHTML = "<span>🛰️</span> Localizando...";
+            const display = document.getElementById('geoDisplay');
 
-            if (!navigator.geolocation) {
-                alert("GPS não suportado.");
-                btn.disabled = false;
-                return;
-            }
+            btn.disabled = true;
+            display.innerText = "🛰️ Buscando satélites...";
+
+            // Configurações de alta precisão
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 10000, // 10 segundos para desistir
+                maximumAge: 0   // Forçar localização atual, não cacheada
+            };
 
             navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    const coords = `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
-                    document.getElementById('geoDisplay').innerHTML = `<span>📍</span> ${coords}`;
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
                     
-                    if (modo === 'auto') registrarAuto(coords);
-                    else liberarManual(target, coords);
-
+                    display.innerText = `📍 ${lat.toFixed(5)}, ${lon.toFixed(5)} (+/- ${accuracy.toFixed(0)}m)`;
+                    
+                    if (modo === 'auto') {
+                        const agora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                        if (!document.getElementById('entrada').value) {
+                            preencher('entrada', agora);
+                        } else {
+                            preencher('saida', agora);
+                        }
+                    } else {
+                        preencher(campoID, document.getElementById(campoID).value || "00:00");
+                        alert("GPS Validado! Edição liberada para este campo.");
+                    }
+                    
                     btn.disabled = false;
-                    btn.innerHTML = "<span>📍</span> Registrar Ponto";
                 },
-                () => {
-                    alert("Acesso ao GPS negado. Ação cancelada.");
+                (error) => {
                     btn.disabled = false;
-                    btn.innerHTML = "<span>📍</span> Registrar Ponto";
+                    let msg = "";
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED: msg = "Usuário negou o GPS."; break;
+                        case error.POSITION_UNAVAILABLE: msg = "Localização indisponível."; break;
+                        case error.TIMEOUT: msg = "Tempo esgotado ao buscar GPS."; break;
+                        default: msg = "Erro desconhecido no GPS."; break;
+                    }
+                    display.innerText = "❌ " + msg;
+                    alert("Atenção: " + msg + "\nCertifique-se de estar usando HTTPS e com o GPS ligado.");
                 },
-                { enableHighAccuracy: true }
+                options
             );
         }
 
-        function registrarAuto(geo) {
-            const agora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            for (let id of ids) {
-                const el = document.getElementById(id);
-                if (!el.value) {
-                    el.value = agora;
-                    el.readOnly = false;
-                    document.getElementById(`box-${id}`).classList.add('unlocked');
-                    logsGeo[id] = geo;
-                    sync();
-                    break;
-                }
-            }
-        }
-
-        function liberarManual(id, geo) {
+        function preencher(id, valor) {
             const el = document.getElementById(id);
+            el.value = valor;
             el.readOnly = false;
-            el.focus();
             document.getElementById(`box-${id}`).classList.add('unlocked');
-            logsGeo[id] = `Manual: ${geo}`;
-            sync();
-        }
-
-        function sync() {
-            const data = { geos: logsGeo };
-            ids.forEach(id => data[id] = document.getElementById(id).value);
-            localStorage.setItem('ponto_v5_save', JSON.stringify(data));
-        }
-
-        function finalizar() {
-            const ent = document.getElementById('entrada').value;
-            const sai = document.getElementById('saida').value;
-            if (!ent || !sai) return alert("Preencha entrada e saída.");
-
-            const db = JSON.parse(localStorage.getItem('ponto_v5_db') || '[]');
-            const diff = (new Date(`1970-01-01T${sai}`) - new Date(`1970-01-01T${ent}`)) / 60000;
-            
-            db.push({
-                data: new Date().toLocaleDateString('pt-BR'),
-                entrada: ent,
-                saida: sai,
-                saldo: diff - 540 // 9h de jornada total (8h trab + 1h almoço)
-            });
-
-            localStorage.setItem('ponto_v5_db', JSON.stringify(db));
-            localStorage.removeItem('ponto_v5_save');
-            location.reload();
-        }
-
-        function render() {
-            const db = JSON.parse(localStorage.getItem('ponto_v5_db') || '[]');
-            document.getElementById('historico').innerHTML = db.reverse().map(i => `
-                <div class="day-card">
-                    <div class="day-info">
-                        <strong>${i.data}</strong>
-                        <p>${i.entrada} • ${i.saida}</p>
-                    </div>
-                    <div class="saldo-badge" style="background: ${i.saldo >= 0 ? '#ecfdf5' : '#fef2f2'}; color: ${i.saldo >= 0 ? var(--success) : var(--danger)}">
-                        ${i.saldo >= 0 ? '+' : ''}${i.saldo}m
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function startTimer() {
-            setInterval(() => {
-                const ent = document.getElementById('entrada').value;
-                if (ent) {
-                    const [h, m] = ent.split(':');
-                    const target = new Date(); target.setHours(parseInt(h) + 9, parseInt(m), 0);
-                    const diff = target - new Date();
-                    if (diff > 0) {
-                        document.getElementById('timer').innerText = new Date(diff).toISOString().substr(11, 8);
-                    } else {
-                        document.getElementById('timer').innerText = "SAÍDA LIBERADA";
-                        document.getElementById('timer').style.fontSize = "1.5rem";
-                    }
-                }
-            }, 1000);
         }
     </script>
 </body>
 </html>
+
 
 
 
