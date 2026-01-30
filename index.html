@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ponto Pro | Auditoria & Controle V8</title>
+    <title>Ponto Pro | Sistema de Auditoria V9</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -154,25 +154,31 @@
             border: none;
             cursor: pointer;
             margin-bottom: 12px;
-            transition: opacity 0.2s;
         }
 
-        .btn-reset-day {
-            width: 100%;
-            padding: 10px;
-            background: transparent;
-            color: var(--danger);
-            border-radius: 10px;
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn-secondary {
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: white;
             font-size: 0.7rem;
             font-weight: 700;
-            border: 1px dashed var(--danger);
             cursor: pointer;
             text-transform: uppercase;
+            transition: 0.2s;
         }
 
-        .btn-reset-day:hover { background: #fef2f2; }
+        .btn-secondary:hover { background: #f9fafb; }
+        .btn-danger-light { color: var(--danger); border-color: #fee2e2; }
+        .btn-success-light { color: var(--success); border-color: #dcfce7; }
 
-        .history-title { font-size: 1rem; font-weight: 700; margin: 20px 0 12px 0; width: 100%; }
+        .history-title { font-size: 1rem; font-weight: 700; margin: 24px 0 12px 0; width: 100%; }
         
         .day-card {
             background: white;
@@ -204,7 +210,7 @@
 
         <div class="card">
             <button id="btnPrincipal" class="btn-ponto" onclick="processarGeolocalizacao('auto')">
-                <span>📍</span> Registrar Ponto
+                <span>📍</span> Registrar Agora
             </button>
 
             <div class="grid-inputs">
@@ -236,7 +242,15 @@
             </div>
 
             <button class="btn-finish" onclick="arquivarDia()">Arquivar Registro do Dia</button>
-            <button class="btn-reset-day" onclick="resetarRascunho()">⚠️ Resetar Registro de Hoje</button>
+            
+            <div class="actions-grid">
+                <button class="btn-secondary btn-danger-light" onclick="resetarRascunho()">🗑️ Resetar Dia</button>
+                <button class="btn-secondary btn-success-light" onclick="exportarCSV()">📊 Baixar CSV</button>
+            </div>
+            
+            <button class="btn-secondary" style="width: 100%; margin-top: 10px;" onclick="abrirPlanilha()">
+                🌐 Abrir Planilha Google
+            </button>
         </div>
 
         <h3 class="history-title">Histórico Recente</h3>
@@ -250,7 +264,7 @@
         document.getElementById('display-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
 
         window.onload = () => {
-            const rascunho = JSON.parse(localStorage.getItem('ponto_v8_save') || '{}');
+            const rascunho = JSON.parse(localStorage.getItem('ponto_v9_save') || '{}');
             registroGeos = rascunho.geos || {};
             
             CAMPOS.forEach(id => {
@@ -281,7 +295,7 @@
                     }
                 },
                 (err) => {
-                    alert("Erro: O GPS é obrigatório para registrar ou editar o ponto.");
+                    alert("Erro: O acesso ao GPS é obrigatório para registrar o ponto.");
                     status.innerHTML = "<span>❌</span> GPS Necessário";
                 },
                 { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
@@ -310,18 +324,17 @@
             document.getElementById(`box-${id}`).classList.add('unlocked');
             registroGeos[id] = `Manual: ${geo}`;
             salvarRascunho();
-            alert("Localização validada! Edição liberada.");
         }
 
         function salvarRascunho() {
             const data = { geos: registroGeos };
             CAMPOS.forEach(id => data[id] = document.getElementById(id).value);
-            localStorage.setItem('ponto_v8_save', JSON.stringify(data));
+            localStorage.setItem('ponto_v9_save', JSON.stringify(data));
         }
 
         function resetarRascunho() {
-            if (confirm("Deseja apagar os registros de hoje? (O histórico arquivado não será afetado)")) {
-                localStorage.removeItem('ponto_v8_save');
+            if (confirm("Deseja apagar os registros de hoje?")) {
+                localStorage.removeItem('ponto_v9_save');
                 location.reload();
             }
         }
@@ -329,25 +342,46 @@
         function arquivarDia() {
             const ent = document.getElementById('entrada').value;
             const sai = document.getElementById('saida').value;
-            if (!ent || !sai) return alert("Entrada e Saída são obrigatórias.");
+            if (!ent || !sai) return alert("Pelo menos Entrada e Saída são necessárias.");
 
-            const db = JSON.parse(localStorage.getItem('ponto_v8_db') || '[]');
+            const db = JSON.parse(localStorage.getItem('ponto_v9_db') || '[]');
             const diff = (new Date(`1970-01-01T${sai}`) - new Date(`1970-01-01T${ent}`)) / 60000;
             
             db.push({
                 data: new Date().toLocaleDateString('pt-BR'),
                 entrada: ent,
                 saida: sai,
+                geoLogs: JSON.stringify(registroGeos),
                 saldo: diff - 540 
             });
 
-            localStorage.setItem('ponto_v8_db', JSON.stringify(db));
-            localStorage.removeItem('ponto_v8_save');
+            localStorage.setItem('ponto_v9_db', JSON.stringify(db));
+            localStorage.removeItem('ponto_v9_save');
             location.reload();
         }
 
+        function exportarCSV() {
+            const db = JSON.parse(localStorage.getItem('ponto_v9_db') || '[]');
+            if (db.length === 0) return alert("Não há histórico para exportar.");
+
+            let csv = "Data;Entrada;Saida;Saldo(min);GPS_Logs\n";
+            db.forEach(row => {
+                csv += `${row.data};${row.entrada};${row.saida};${row.saldo};${row.geoLogs}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "historico_ponto.csv");
+            link.click();
+        }
+
+        function abrirPlanilha() {
+            window.open("https://docs.google.com/spreadsheets/d/1bdq5e9RxZLklrprFTnRoLi08tg7WNCD365JAJDgqo-4/edit", "_blank");
+        }
+
         function renderizarHistorico() {
-            const db = JSON.parse(localStorage.getItem('ponto_v8_db') || '[]');
+            const db = JSON.parse(localStorage.getItem('ponto_v9_db') || '[]');
             document.getElementById('lista-historico').innerHTML = db.reverse().map(i => `
                 <div class="day-card">
                     <div><strong>${i.data}</strong><br><small>${i.entrada} • ${i.saida}</small></div>
@@ -366,16 +400,14 @@
                     const meta = new Date(); meta.setHours(parseInt(h) + 9, parseInt(m), 0);
                     const diff = meta - new Date();
                     if (diff > 0) document.getElementById('timer').innerText = new Date(diff).toISOString().substr(11, 8);
-                    else {
-                        document.getElementById('timer').innerText = "LIBERADO";
-                        document.getElementById('timer').style.color = "var(--success)";
-                    }
+                    else document.getElementById('timer').innerText = "LIBERADO";
                 }
             }, 1000);
         }
     </script>
 </body>
 </html>
+
 
 
 
